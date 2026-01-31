@@ -1,0 +1,72 @@
+{
+  "name": "robloxgame",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "newrb/src/shared"
+      }
+    },
+
+    "ServerScriptService": {
+      "Server": {
+        "$path": "newrb/src/server"
+      }
+    },
+
+    "ServerStorage": {
+      "$className": "ServerStorage"
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "newrb/src/client"
+        }
+      },
+      "StarterCharacterScripts": {
+        "$className": "StarterCharacterScripts"
+      }
+    },
+
+    "StarterPack": {
+      "$className": "StarterPack"
+    },
+
+    "StarterGui": {
+      "$className": "StarterGui",
+      "$properties": {
+        "ResetPlayerGuiOnSpawn": false
+      }
+    },
+
+    "Players": {
+      "$className": "Players"
+    },
+
+    "Workspace": {
+      "$properties": {
+        "FilteringEnabled": true
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Ambient": [
+          0.15,
+          0.15,
+          0.18
+        ],
+        "Brightness": 1,
+        "GlobalShadows": true,
+        "Outlines": false,
+        "Technology": "ShadowMap"
+      }
+    },
+    "SoundService": {
+      "$properties": {
+        "RespectFilteringEnabled": true
+      }
+    }
+  }
+}

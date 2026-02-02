@@ -48,34 +48,40 @@ Config.Rarities = {
 -- Weapons with their rarities and odds
 Config.Weapons = {
 	-- Common (1 in 2)
-	rusty_sword = { id = "rusty_sword", name = "Rusty Sword", rarity = "Common", odds = 2 },
+	iron_daggers = { id = "iron_daggers", name = "Iron Daggers", rarity = "Common", odds = 2 },
+	metal_sword = { id = "metal_sword", name = "Metal Sword", rarity = "Common", odds = 2 },
+	wood_scythe = { id = "wood_scythe", name = "Wood Scythe", rarity = "Common", odds = 2 },
 	wooden_bow = { id = "wooden_bow", name = "Wooden Bow", rarity = "Common", odds = 2 },
-	iron_dagger = { id = "iron_dagger", name = "Iron Dagger", rarity = "Common", odds = 2 },
-	broken_axe = { id = "broken_axe", name = "Broken Axe", rarity = "Common", odds = 2 },
-	
-	-- Uncommon (1 in 10)
-	steel_blade = { id = "steel_blade", name = "Steel Blade", rarity = "Uncommon", odds = 10 },
-	hunter_bow = { id = "hunter_bow", name = "Hunter Bow", rarity = "Uncommon", odds = 10 },
-	shadow_dagger = { id = "shadow_dagger", name = "Shadow Dagger", rarity = "Uncommon", odds = 10 },
-	battle_axe = { id = "battle_axe", name = "Battle Axe", rarity = "Uncommon", odds = 10 },
+	rusty_spear = { id = "rusty_spear", name = "Rusty Spear", rarity = "Common", odds = 2 },
+	training_axe = { id = "training_axe", name = "Training Axe", rarity = "Common", odds = 2 },
+	broken_mace = { id = "broken_mace", name = "Broken Mace", rarity = "Common", odds = 2 },
+	slingshot = { id = "slingshot", name = "Slingshot", rarity = "Common", odds = 2 },
+	iron_club = { id = "iron_club", name = "Iron Club", rarity = "Common", odds = 2 },
+	short_sword = { id = "short_sword", name = "Short Sword", rarity = "Common", odds = 2 },
 	
 	-- Rare (1 in 100)
-	flame_axe = { id = "flame_axe", name = "Flame Axe", rarity = "Rare", odds = 100 },
-	frost_staff = { id = "frost_staff", name = "Frost Staff", rarity = "Rare", odds = 100 },
-	thunder_blade = { id = "thunder_blade", name = "Thunder Blade", rarity = "Rare", odds = 100 },
+	pistol = { id = "pistol", name = "Pistol", rarity = "Rare", odds = 100 },
+	chainsaw_sword = { id = "chainsaw_sword", name = "Chainsaw Sword", rarity = "Rare", odds = 100 },
+	spikey_scythe = { id = "spikey_scythe", name = "Spikey Scythe", rarity = "Rare", odds = 100 },
+	crossbow = { id = "crossbow", name = "Crossbow", rarity = "Rare", odds = 100 },
+	war_hammer = { id = "war_hammer", name = "War Hammer", rarity = "Rare", odds = 100 },
+	dual_steel_daggers = { id = "dual_steel_daggers", name = "Dual Steel Daggers", rarity = "Rare", odds = 100 },
+	flame_baton = { id = "flame_baton", name = "Flame Baton", rarity = "Rare", odds = 100 },
+	heavy_cleaver = { id = "heavy_cleaver", name = "Heavy Cleaver", rarity = "Rare", odds = 100 },
+	shock_rod = { id = "shock_rod", name = "Shock Rod", rarity = "Rare", odds = 100 },
+	bone_crusher = { id = "bone_crusher", name = "Bone Crusher", rarity = "Rare", odds = 100 },
 	
 	-- Epic (1 in 1000)
-	storm_cleaver = { id = "storm_cleaver", name = "Storm Cleaver", rarity = "Epic", odds = 1000 },
-	void_scythe = { id = "void_scythe", name = "Void Scythe", rarity = "Epic", odds = 1000 },
-	phoenix_bow = { id = "phoenix_bow", name = "Phoenix Bow", rarity = "Epic", odds = 1000 },
-	
-	-- Legendary (1 in 10000)
-	dragon_slayer = { id = "dragon_slayer", name = "Dragon Slayer", rarity = "Legendary", odds = 10000 },
-	crown_blade = { id = "crown_blade", name = "Crown Blade", rarity = "Legendary", odds = 10000 },
-	
-	-- Mythic (1 in 100000)
-	godly_katana = { id = "godly_katana", name = "Godly Katana", rarity = "Mythic", odds = 100000 },
-	celestial_bow = { id = "celestial_bow", name = "Celestial Bow", rarity = "Mythic", odds = 100000 },
+	blazefang_sword = { id = "blazefang_sword", name = "Blazefang Sword", rarity = "Epic", odds = 1000 },
+	stormcaller_spear = { id = "stormcaller_spear", name = "Stormcaller Spear", rarity = "Epic", odds = 1000 },
+	gravewarden_axe = { id = "gravewarden_axe", name = "Gravewarden Axe", rarity = "Epic", odds = 1000 },
+	frostbound_bow = { id = "frostbound_bow", name = "Frostbound Bow", rarity = "Epic", odds = 1000 },
+	blood_moon_scythe = { id = "blood_moon_scythe", name = "Blood Moon Scythe", rarity = "Epic", odds = 1000 },
+	arcane_warhammer = { id = "arcane_warhammer", name = "Arcane Warhammer", rarity = "Epic", odds = 1000 },
+	shadowstep_daggers = { id = "shadowstep_daggers", name = "Shadowstep Daggers", rarity = "Epic", odds = 1000 },
+	venom_lash_whip = { id = "venom_lash_whip", name = "Venom Lash Whip", rarity = "Epic", odds = 1000 },
+	runic_crossbow = { id = "runic_crossbow", name = "Runic Crossbow", rarity = "Epic", odds = 1000 },
+	inferno_flail = { id = "inferno_flail", name = "Inferno Flail", rarity = "Epic", odds = 1000 },
 }
 
 -- Crates (bought with keys)
@@ -86,50 +92,30 @@ Config.Crates = {
 		keyCost = 5,
 		description = "A basic crate with common weapons.",
 		weaponPool = {
-			"rusty_sword", "wooden_bow", "iron_dagger", "broken_axe",
-			"steel_blade", "hunter_bow", "shadow_dagger", "battle_axe",
-			"flame_axe", "frost_staff", "thunder_blade",
-			"storm_cleaver", "void_scythe", "phoenix_bow",
-			"dragon_slayer", "crown_blade",
-			"godly_katana", "celestial_bow",
+			-- Common
+			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
+			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			-- Rare
+			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
+			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
+			-- Epic
+			"blazefang_sword", "stormcaller_spear", "gravewarden_axe", "frostbound_bow", "blood_moon_scythe",
+			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
 		},
 	},
-	warrior = {
-		id = "warrior",
-		name = "Warrior Crate",
-		keyCost = 15,
-		description = "Higher chance of rare swords and axes.",
-		weaponPool = {
-			"steel_blade", "battle_axe",
-			"flame_axe", "thunder_blade",
-			"storm_cleaver",
-			"dragon_slayer", "crown_blade",
-			"godly_katana",
-		},
+	case2 = {
+		id = "case2",
+		name = "Case 2",
+		keyCost = 300,
+		description = "",
+		weaponPool = {},
 	},
-	hunter = {
-		id = "hunter",
-		name = "Hunter Crate",
-		keyCost = 15,
-		description = "Bows and ranged weapons.",
-		weaponPool = {
-			"wooden_bow", "hunter_bow",
-			"frost_staff",
-			"phoenix_bow",
-			"celestial_bow",
-		},
-	},
-	legendary = {
-		id = "legendary",
-		name = "Legendary Crate",
-		keyCost = 50,
-		description = "Better odds for rare items!",
-		weaponPool = {
-			"flame_axe", "frost_staff", "thunder_blade",
-			"storm_cleaver", "void_scythe", "phoenix_bow",
-			"dragon_slayer", "crown_blade",
-			"godly_katana", "celestial_bow",
-		},
+	case3 = {
+		id = "case3",
+		name = "Case 3",
+		keyCost = 800,
+		description = "",
+		weaponPool = {},
 	},
 }
 

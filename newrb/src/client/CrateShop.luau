@@ -162,9 +162,17 @@ function CrateShop.refresh(state: any)
 	end
 	local maxSlots = state.maxSlots or 10
 	
-	-- Build buy section
+	-- Build buy section (sorted by keyCost, cheapest first)
+	local sortedCrates = {}
 	for crateId, crateDef in Config.Crates do
-		buildCrateCard(crateId, crateDef, state.keys, inventoryUsed, maxSlots, buyScroll)
+		table.insert(sortedCrates, { id = crateId, def = crateDef })
+	end
+	table.sort(sortedCrates, function(a, b)
+		return a.def.keyCost < b.def.keyCost
+	end)
+	
+	for _, crate in sortedCrates do
+		buildCrateCard(crate.id, crate.def, state.keys, inventoryUsed, maxSlots, buyScroll)
 	end
 end
 

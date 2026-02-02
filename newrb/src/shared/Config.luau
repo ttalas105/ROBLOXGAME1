@@ -8,7 +8,7 @@
 	Odds are "1 in X" (e.g. 100000 = 0.001% chance).
 ]]
 
-export type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic"
+export type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic" | "Exotic" | "Divine"
 
 export type WeaponDef = {
 	id: string,
@@ -43,6 +43,8 @@ Config.Rarities = {
 	Epic = { order = 4, color = Color3.fromRGB(190, 94, 255) },
 	Legendary = { order = 5, color = Color3.fromRGB(255, 170, 0) },
 	Mythic = { order = 6, color = Color3.fromRGB(255, 50, 100) },
+	Exotic = { order = 7, color = Color3.fromRGB(220, 20, 60) },
+	Divine = { order = 8, color = Color3.fromRGB(0, 255, 255) },
 }
 
 -- Weapons with their rarities and odds
@@ -82,6 +84,41 @@ Config.Weapons = {
 	venom_lash_whip = { id = "venom_lash_whip", name = "Venom Lash Whip", rarity = "Epic", odds = 1000 },
 	runic_crossbow = { id = "runic_crossbow", name = "Runic Crossbow", rarity = "Epic", odds = 1000 },
 	inferno_flail = { id = "inferno_flail", name = "Inferno Flail", rarity = "Epic", odds = 1000 },
+	
+	-- Legendary (1 in 10000)
+	dragonheart_greatsword = { id = "dragonheart_greatsword", name = "Dragonheart Greatsword", rarity = "Legendary", odds = 10000 },
+	tempest_glaive = { id = "tempest_glaive", name = "Tempest Glaive", rarity = "Legendary", odds = 10000 },
+	reaper_king_scythe = { id = "reaper_king_scythe", name = "Reaper King Scythe", rarity = "Legendary", odds = 10000 },
+	celestial_longbow = { id = "celestial_longbow", name = "Celestial Longbow", rarity = "Legendary", odds = 10000 },
+	obsidian_colossus_hammer = { id = "obsidian_colossus_hammer", name = "Obsidian Colossus Hammer", rarity = "Legendary", odds = 10000 },
+	voidfang_daggers = { id = "voidfang_daggers", name = "Voidfang Daggers", rarity = "Legendary", odds = 10000 },
+	phoenix_blade = { id = "phoenix_blade", name = "Phoenix Blade", rarity = "Legendary", odds = 10000 },
+	thunderlord_mace = { id = "thunderlord_mace", name = "Thunderlord Mace", rarity = "Legendary", odds = 10000 },
+	blood_oath_spear = { id = "blood_oath_spear", name = "Blood Oath Spear", rarity = "Legendary", odds = 10000 },
+	spectral_greatshield = { id = "spectral_greatshield", name = "Spectral Greatshield", rarity = "Legendary", odds = 10000 },
+	
+	-- Exotic (1 in 50000)
+	chrono_blade = { id = "chrono_blade", name = "Chrono Blade", rarity = "Exotic", odds = 50000 },
+	soul_devourer_scythe = { id = "soul_devourer_scythe", name = "Soul Devourer Scythe", rarity = "Exotic", odds = 50000 },
+	eclipse_bow = { id = "eclipse_bow", name = "Eclipse Bow", rarity = "Exotic", odds = 50000 },
+	storm_gods_hammer = { id = "storm_gods_hammer", name = "Storm God's Hammer", rarity = "Exotic", odds = 50000 },
+	void_monarch_daggers = { id = "void_monarch_daggers", name = "Void Monarch Daggers", rarity = "Exotic", odds = 50000 },
+	infernal_tyrant_sword = { id = "infernal_tyrant_sword", name = "Infernal Tyrant Sword", rarity = "Exotic", odds = 50000 },
+	plaguebearer_flail = { id = "plaguebearer_flail", name = "Plaguebearer Flail", rarity = "Exotic", odds = 50000 },
+	astral_lance = { id = "astral_lance", name = "Astral Lance", rarity = "Exotic", odds = 50000 },
+	grim_covenant_axe = { id = "grim_covenant_axe", name = "Grim Covenant Axe", rarity = "Exotic", odds = 50000 },
+	worldrender_greatsword = { id = "worldrender_greatsword", name = "Worldrender Greatsword", rarity = "Exotic", odds = 50000 },
+	
+	-- Divine (1 in 100000)
+	anris_blade_of_ascension = { id = "anris_blade_of_ascension", name = "Anri's Blade of Ascension", rarity = "Divine", odds = 100000 },
+	arbels_astral_singularity = { id = "arbels_astral_singularity", name = "Arbel's Astral Singularity", rarity = "Divine", odds = 100000 },
+	farids_titanbreaker_gauntlets = { id = "farids_titanbreaker_gauntlets", name = "Farid's Titanbreaker Gauntlets", rarity = "Divine", odds = 100000 },
+	rajans_mindweaver_blade = { id = "rajans_mindweaver_blade", name = "Rajan's Mindweaver Blade", rarity = "Divine", odds = 100000 },
+	thomass_fang_of_twin_realms = { id = "thomass_fang_of_twin_realms", name = "Thomas's Fang of the Twin Realms", rarity = "Divine", odds = 100000 },
+	aydins_gilded_dominion = { id = "aydins_gilded_dominion", name = "Aydin's Gilded Dominion", rarity = "Divine", odds = 100000 },
+	aryas_courtmaster_chakram = { id = "aryas_courtmaster_chakram", name = "Arya's Courtmaster Chakram", rarity = "Divine", odds = 100000 },
+	kims_architect_of_whispers = { id = "kims_architect_of_whispers", name = "Kim's Architect of Whispers", rarity = "Divine", odds = 100000 },
+	salims_equilibrium_staff = { id = "salims_equilibrium_staff", name = "Salim's Equilibrium Staff", rarity = "Divine", odds = 100000 },
 }
 
 -- Crates (bought with keys)
@@ -101,6 +138,15 @@ Config.Crates = {
 			-- Epic
 			"blazefang_sword", "stormcaller_spear", "gravewarden_axe", "frostbound_bow", "blood_moon_scythe",
 			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
+			-- Legendary
+			"dragonheart_greatsword", "tempest_glaive", "reaper_king_scythe", "celestial_longbow", "obsidian_colossus_hammer",
+			"voidfang_daggers", "phoenix_blade", "thunderlord_mace", "blood_oath_spear", "spectral_greatshield",
+			-- Exotic
+			"chrono_blade", "soul_devourer_scythe", "eclipse_bow", "storm_gods_hammer", "void_monarch_daggers",
+			"infernal_tyrant_sword", "plaguebearer_flail", "astral_lance", "grim_covenant_axe", "worldrender_greatsword",
+			-- Divine
+			"anris_blade_of_ascension", "arbels_astral_singularity", "farids_titanbreaker_gauntlets", "rajans_mindweaver_blade",
+			"thomass_fang_of_twin_realms", "aydins_gilded_dominion", "aryas_courtmaster_chakram", "kims_architect_of_whispers", "salims_equilibrium_staff",
 		},
 	},
 	case2 = {

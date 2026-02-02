@@ -10,46 +10,73 @@ local Remotes = require(script.Parent.Remotes)
 local ShopService = {}
 local Random = Random.new()
 
--- Weighted roll: pick weapon from crate pool
--- Weight = 1/odds, so "1 in 100000" has weight 0.00001
--- Luck multiplier decreases the odds (makes rare items more likely)
+-- Roll weapon from crate using per-case rarity chances
+-- Each case defines rarityChances (e.g. { Common = 80, Rare = 20 })
 local function rollWeaponFromCrate(crateId: string, luckMultiplier: number)
 	local crateDef = Config.Crates[crateId]
 	if not crateDef then return nil end
 	
 	local pool = crateDef.weaponPool
-	local totalWeight = 0
-	local weights: { number } = {}
+	local rarityChances = crateDef.rarityChances
 	
+	if not rarityChances then
+		-- Fallback: pick random weapon from pool if no rarityChances defined
+		local weaponId = pool[Random:NextInteger(1, #pool)]
+		local def = Config.Weapons[weaponId]
+		return weaponId, def and def.odds or 1
+	end
+	
+	-- Roll for rarity based on case's rarityChances (percentages)
+	local roll = Random:NextNumber(0, 100)
+	local cumulative = 0
+	local selectedRarity = nil
+	
+	-- Sort rarities by their order to ensure consistent rolling
+	local sortedRarities = {}
+	for rarity, chance in rarityChances do
+		table.insert(sortedRarities, { rarity = rarity, chance = chance })
+	end
+	table.sort(sortedRarities, function(a, b)
+		local orderA = Config.Rarities[a.rarity] and Config.Rarities[a.rarity].order or 99
+		local orderB = Config.Rarities[b.rarity] and Config.Rarities[b.rarity].order or 99
+		return orderA < orderB
+	end)
+	
+	for _, entry in sortedRarities do
+		cumulative += entry.chance
+		if roll <= cumulative then
+			selectedRarity = entry.rarity
+			break
+		end
+	end
+	
+	-- Fallback to first rarity if none selected
+	if not selectedRarity then
+		selectedRarity = sortedRarities[1] and sortedRarities[1].rarity or "Common"
+	end
+	
+	-- Get all weapons of the selected rarity from the pool
+	local rarityWeapons = {}
 	for _, weaponId in pool do
 		local def = Config.Weapons[weaponId]
-		if def then
-			-- Apply luck: divide odds by luck multiplier (higher luck = lower odds = more weight)
-			local adjustedOdds = math.max(1, def.odds / luckMultiplier)
-			local w = 1 / adjustedOdds
-			totalWeight += w
-			table.insert(weights, w)
-		else
-			table.insert(weights, 0)
+		if def and def.rarity == selectedRarity then
+			table.insert(rarityWeapons, weaponId)
 		end
 	end
 	
-	if totalWeight <= 0 then return nil end
-	
-	local r = Random:NextNumber(0, totalWeight)
-	for i, weaponId in pool do
-		local w = weights[i] or 0
-		if r <= w then
-			local def = Config.Weapons[weaponId]
-			return weaponId, def and def.odds or 1
-		end
-		r -= w
+	-- Pick random weapon from that rarity
+	if #rarityWeapons > 0 then
+		local weaponId = rarityWeapons[Random:NextInteger(1, #rarityWeapons)]
+		local def = Config.Weapons[weaponId]
+		-- Return the rarity chance as "odds" for display purposes
+		local chance = rarityChances[selectedRarity] or 1
+		return weaponId, math.floor(100 / chance) -- Convert percentage to "1 in X" format
 	end
 	
-	-- Fallback to last item
-	local lastId = pool[#pool]
-	local def = Config.Weapons[lastId]
-	return lastId, def and def.odds or 1
+	-- Fallback to any weapon in pool
+	local weaponId = pool[Random:NextInteger(1, #pool)]
+	local def = Config.Weapons[weaponId]
+	return weaponId, def and def.odds or 1
 end
 
 local function stateForClient(player: Player)

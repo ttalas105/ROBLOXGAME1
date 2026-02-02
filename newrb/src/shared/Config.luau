@@ -181,6 +181,33 @@ Config.Crates = {
 			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
 		},
 	},
+	case4 = {
+		id = "case4",
+		name = "Case 4",
+		keyCost = 2000,
+		description = "Unlocked after defeating Arena 1",
+		requiresArena = 1,
+		weaponPool = {
+			-- Common
+			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
+			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			-- Rare
+			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
+			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
+			-- Epic
+			"blazefang_sword", "stormcaller_spear", "gravewarden_axe", "frostbound_bow", "blood_moon_scythe",
+			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
+			-- Legendary
+			"dragonheart_greatsword", "tempest_glaive", "reaper_king_scythe", "celestial_longbow", "obsidian_colossus_hammer",
+			"voidfang_daggers", "phoenix_blade", "thunderlord_mace", "blood_oath_spear", "spectral_greatshield",
+			-- Exotic
+			"chrono_blade", "soul_devourer_scythe", "eclipse_bow", "storm_gods_hammer", "void_monarch_daggers",
+			"infernal_tyrant_sword", "plaguebearer_flail", "astral_lance", "grim_covenant_axe", "worldrender_greatsword",
+			-- Divine
+			"anris_blade_of_ascension", "arbels_astral_singularity", "farids_titanbreaker_gauntlets", "rajans_mindweaver_blade",
+			"thomass_fang_of_twin_realms", "aydins_gilded_dominion", "aryas_courtmaster_chakram", "kims_architect_of_whispers", "salims_equilibrium_staff",
+		},
+	},
 }
 
 -- Upgrades (bought with XP)

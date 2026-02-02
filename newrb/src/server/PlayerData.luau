@@ -13,6 +13,7 @@ export type PlayerDataState = {
 	weapons: { WeaponInstance },
 	crates: { [string]: number }, -- crateId -> count
 	upgrades: { [string]: number }, -- upgradeId -> level/count
+	arenasCompleted: { [number]: boolean }, -- arenaNumber -> completed
 }
 
 local PlayerData = {}
@@ -32,6 +33,7 @@ local function getOrCreate(player: Player): PlayerDataState
 			weapons = {},
 			crates = {},
 			upgrades = {},
+			arenasCompleted = {},
 		}
 	end
 	return dataByPlayer[player]
@@ -236,6 +238,22 @@ function PlayerData.updateLeaderstats(player: Player)
 	
 	local xpStat = leaderstats:FindFirstChild("XP")
 	if xpStat then xpStat.Value = d.xp end
+end
+
+-- Arenas
+function PlayerData.hasCompletedArena(player: Player, arenaNumber: number): boolean
+	local d = getOrCreate(player)
+	return d.arenasCompleted[arenaNumber] == true
+end
+
+function PlayerData.completeArena(player: Player, arenaNumber: number)
+	local d = getOrCreate(player)
+	d.arenasCompleted[arenaNumber] = true
+end
+
+function PlayerData.getArenasCompleted(player: Player): { [number]: boolean }
+	local d = getOrCreate(player)
+	return d.arenasCompleted
 end
 
 -- Clean up when player leaves

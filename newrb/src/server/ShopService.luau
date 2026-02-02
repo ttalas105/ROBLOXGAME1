@@ -88,6 +88,7 @@ local function stateForClient(player: Player)
 		crates = d.crates,
 		upgrades = d.upgrades,
 		maxSlots = PlayerData.getMaxInventorySlots(player),
+		arenasCompleted = PlayerData.getArenasCompleted(player),
 	}
 end
 
@@ -112,6 +113,14 @@ local function onBuyCrate(player: Player, crateId: string, quantity: number?)
 	if not crateDef then 
 		warn("[ShopService] Invalid crate:", crateId)
 		return 
+	end
+	
+	-- Check arena requirement
+	if crateDef.requiresArena then
+		if not PlayerData.hasCompletedArena(player, crateDef.requiresArena) then
+			warn("[ShopService] Player hasn't completed Arena", crateDef.requiresArena)
+			return
+		end
 	end
 	
 	local totalCost = crateDef.keyCost * count

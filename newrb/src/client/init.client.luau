@@ -67,6 +67,9 @@ if not CrateOpener then return end
 local InventoryBar = safeRequire("InventoryBar")
 if not InventoryBar then return end
 
+local HealthBar = safeRequire("HealthBar")
+if not HealthBar then return end
+
 print("[Client] All modules loaded, building UIs...")
 
 -- Build all shop UIs (hidden by default)
@@ -75,6 +78,7 @@ SellShop.build(playerGui)
 UpgradesShop.build(playerGui)
 CrateOpener.build(playerGui)
 InventoryBar.build(playerGui)
+HealthBar.build(playerGui)
 
 -- Connect inventory bar to crate opener (to hide pending weapons)
 InventoryBar.setCrateOpener(CrateOpener)
@@ -140,6 +144,15 @@ end)
 ShopRemotes.playerDataUpdated().OnClientEvent:Connect(function(newState)
 	print("[Client] Player data updated")
 	refreshAllShops(newState)
+	-- Update health bar if health data is included
+	if newState.health and newState.maxHealth then
+		HealthBar.update(newState.health, newState.maxHealth)
+	end
+end)
+
+-- Listen for health updates specifically (for combat damage/healing)
+ShopRemotes.healthUpdated().OnClientEvent:Connect(function(health: number, maxHealth: number)
+	HealthBar.update(health, maxHealth)
 end)
 
 -- Fetch initial player data from server
@@ -151,9 +164,16 @@ task.spawn(function()
 	if ok and state then
 		print("[Client] Got player data from server")
 		refreshAllShops(state)
+		-- Set initial health
+		if state.health and state.maxHealth then
+			HealthBar.setHealth(state.health, state.maxHealth)
+		else
+			HealthBar.setHealth(100, 100) -- Default
+		end
 	else
 		warn("[Client] Could not fetch player data, using defaults")
 		refreshAllShops(DEFAULT_STATE)
+		HealthBar.setHealth(100, 100)
 	end
 end)
 

@@ -66,4 +66,9 @@ function ShopRemotes.openUpgradesShop(): RemoteEvent
 	return getFolder():WaitForChild("OpenUpgradesShop") :: RemoteEvent
 end
 
+-- Health system
+function ShopRemotes.healthUpdated(): RemoteEvent
+	return getFolder():WaitForChild("HealthUpdated") :: RemoteEvent
+end
+
 return ShopRemotes

@@ -14,6 +14,8 @@ export type PlayerDataState = {
 	crates: { [string]: number }, -- crateId -> count
 	upgrades: { [string]: number }, -- upgradeId -> level/count
 	arenasCompleted: { [number]: boolean }, -- arenaNumber -> completed
+	health: number, -- current health
+	maxHealth: number, -- max health (base 100, can be increased)
 }
 
 local PlayerData = {}
@@ -25,6 +27,8 @@ local function newUid(): string
 	return "w_" .. tostring(nextUid) .. "_" .. tostring(os.time())
 end
 
+local BASE_HEALTH = 100
+
 local function getOrCreate(player: Player): PlayerDataState
 	if not dataByPlayer[player] then
 		dataByPlayer[player] = {
@@ -34,6 +38,8 @@ local function getOrCreate(player: Player): PlayerDataState
 			crates = {},
 			upgrades = {},
 			arenasCompleted = {},
+			health = BASE_HEALTH,
+			maxHealth = BASE_HEALTH,
 		}
 	end
 	return dataByPlayer[player]
@@ -238,6 +244,59 @@ function PlayerData.updateLeaderstats(player: Player)
 	
 	local xpStat = leaderstats:FindFirstChild("XP")
 	if xpStat then xpStat.Value = d.xp end
+end
+
+-- Health
+function PlayerData.getHealth(player: Player): number
+	return getOrCreate(player).health
+end
+
+function PlayerData.getMaxHealth(player: Player): number
+	return getOrCreate(player).maxHealth
+end
+
+function PlayerData.setHealth(player: Player, amount: number): number
+	local d = getOrCreate(player)
+	d.health = math.clamp(amount, 0, d.maxHealth)
+	return d.health
+end
+
+function PlayerData.damage(player: Player, amount: number): number
+	local d = getOrCreate(player)
+	d.health = math.max(0, d.health - amount)
+	return d.health
+end
+
+function PlayerData.heal(player: Player, amount: number): number
+	local d = getOrCreate(player)
+	d.health = math.min(d.maxHealth, d.health + amount)
+	return d.health
+end
+
+function PlayerData.resetHealth(player: Player): number
+	local d = getOrCreate(player)
+	d.health = d.maxHealth
+	return d.health
+end
+
+function PlayerData.setMaxHealth(player: Player, amount: number): number
+	local d = getOrCreate(player)
+	d.maxHealth = math.max(1, amount)
+	-- If current health exceeds new max, clamp it
+	if d.health > d.maxHealth then
+		d.health = d.maxHealth
+	end
+	return d.maxHealth
+end
+
+function PlayerData.increaseMaxHealth(player: Player, amount: number): number
+	local d = getOrCreate(player)
+	d.maxHealth = d.maxHealth + amount
+	return d.maxHealth
+end
+
+function PlayerData.isDead(player: Player): boolean
+	return getOrCreate(player).health <= 0
 end
 
 -- Arenas

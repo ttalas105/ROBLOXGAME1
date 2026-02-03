@@ -130,15 +130,27 @@ Config.Crates = {
 		description = "A basic crate with common weapons.",
 		rarityChances = {
 			Common = 80,
-			Rare = 20,
+			Epic = 19.6,
+			Legendary = 0.1,
+			Exotic = 0.1,
+			Divine = 0.1,
 		},
 		weaponPool = {
 			-- Common
 			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
 			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
-			-- Rare
-			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
-			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
+			-- Epic
+			"blazefang_sword", "stormcaller_spear", "gravewarden_axe", "frostbound_bow", "blood_moon_scythe",
+			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
+			-- Legendary
+			"dragonheart_greatsword", "tempest_glaive", "reaper_king_scythe", "celestial_longbow", "obsidian_colossus_hammer",
+			"voidfang_daggers", "phoenix_blade", "thunderlord_mace", "blood_oath_spear", "spectral_greatshield",
+			-- Exotic
+			"chrono_blade", "soul_devourer_scythe", "eclipse_bow", "storm_gods_hammer", "void_monarch_daggers",
+			"infernal_tyrant_sword", "plaguebearer_flail", "astral_lance", "grim_covenant_axe", "worldrender_greatsword",
+			-- Divine
+			"anris_blade_of_ascension", "arbels_astral_singularity", "farids_titanbreaker_gauntlets", "rajans_mindweaver_blade",
+			"thomass_fang_of_twin_realms", "aydins_gilded_dominion", "aryas_courtmaster_chakram", "kims_architect_of_whispers", "salims_equilibrium_staff",
 		},
 	},
 	case2 = {
@@ -148,26 +160,11 @@ Config.Crates = {
 		description = "",
 		rarityChances = {
 			Common = 70,
-			Rare = 30,
-		},
-		weaponPool = {
-			-- Common
-			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
-			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
-			-- Rare
-			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
-			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
-		},
-	},
-	case3 = {
-		id = "case3",
-		name = "Case 3",
-		keyCost = 800,
-		description = "",
-		rarityChances = {
-			Common = 65,
-			Rare = 34,
-			Epic = 1,
+			Rare = 29,
+			Epic = 0.5,
+			Legendary = 0.3,
+			Exotic = 0.1,
+			Divine = 0.1,
 		},
 		weaponPool = {
 			-- Common
@@ -179,6 +176,49 @@ Config.Crates = {
 			-- Epic
 			"blazefang_sword", "stormcaller_spear", "gravewarden_axe", "frostbound_bow", "blood_moon_scythe",
 			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
+			-- Legendary
+			"dragonheart_greatsword", "tempest_glaive", "reaper_king_scythe", "celestial_longbow", "obsidian_colossus_hammer",
+			"voidfang_daggers", "phoenix_blade", "thunderlord_mace", "blood_oath_spear", "spectral_greatshield",
+			-- Exotic
+			"chrono_blade", "soul_devourer_scythe", "eclipse_bow", "storm_gods_hammer", "void_monarch_daggers",
+			"infernal_tyrant_sword", "plaguebearer_flail", "astral_lance", "grim_covenant_axe", "worldrender_greatsword",
+			-- Divine
+			"anris_blade_of_ascension", "arbels_astral_singularity", "farids_titanbreaker_gauntlets", "rajans_mindweaver_blade",
+			"thomass_fang_of_twin_realms", "aydins_gilded_dominion", "aryas_courtmaster_chakram", "kims_architect_of_whispers", "salims_equilibrium_staff",
+		},
+	},
+	case3 = {
+		id = "case3",
+		name = "Case 3",
+		keyCost = 800,
+		description = "",
+		rarityChances = {
+			Common = 64,
+			Rare = 34,
+			Epic = 1.2,
+			Legendary = 0.6,
+			Exotic = 0.1,
+			Divine = 0.1,
+		},
+		weaponPool = {
+			-- Common
+			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
+			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			-- Rare
+			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
+			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
+			-- Epic
+			"blazefang_sword", "stormcaller_spear", "gravewarden_axe", "frostbound_bow", "blood_moon_scythe",
+			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
+			-- Legendary
+			"dragonheart_greatsword", "tempest_glaive", "reaper_king_scythe", "celestial_longbow", "obsidian_colossus_hammer",
+			"voidfang_daggers", "phoenix_blade", "thunderlord_mace", "blood_oath_spear", "spectral_greatshield",
+			-- Exotic
+			"chrono_blade", "soul_devourer_scythe", "eclipse_bow", "storm_gods_hammer", "void_monarch_daggers",
+			"infernal_tyrant_sword", "plaguebearer_flail", "astral_lance", "grim_covenant_axe", "worldrender_greatsword",
+			-- Divine
+			"anris_blade_of_ascension", "arbels_astral_singularity", "farids_titanbreaker_gauntlets", "rajans_mindweaver_blade",
+			"thomass_fang_of_twin_realms", "aydins_gilded_dominion", "aryas_courtmaster_chakram", "kims_architect_of_whispers", "salims_equilibrium_staff",
 		},
 	},
 	case4 = {

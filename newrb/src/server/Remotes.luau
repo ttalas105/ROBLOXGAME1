@@ -69,6 +69,9 @@ function Remotes.createAll()
 	Remotes.OpenSellShop = Remotes.createRemoteEvent("OpenSellShop")
 	Remotes.OpenUpgradesShop = Remotes.createRemoteEvent("OpenUpgradesShop")
 	
+	-- Health system
+	Remotes.HealthUpdated = Remotes.createRemoteEvent("HealthUpdated")
+	
 	return Remotes
 end
 

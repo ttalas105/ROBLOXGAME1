@@ -89,6 +89,8 @@ local function stateForClient(player: Player)
 		upgrades = d.upgrades,
 		maxSlots = PlayerData.getMaxInventorySlots(player),
 		arenasCompleted = PlayerData.getArenasCompleted(player),
+		health = d.health,
+		maxHealth = d.maxHealth,
 	}
 end
 
@@ -279,6 +281,36 @@ function ShopService.start()
 	Remotes.GetPlayerData.OnServerInvoke = onGetPlayerData
 	
 	print("[ShopService] Started")
+end
+
+-- Fire health update to a specific player (call this when health changes from combat, etc.)
+function ShopService.fireHealthUpdate(player: Player)
+	local d = PlayerData.get(player)
+	local ev = Remotes.getFolder():FindFirstChild("HealthUpdated")
+	if ev and ev:IsA("RemoteEvent") then
+		(ev :: RemoteEvent):FireClient(player, d.health, d.maxHealth)
+	end
+end
+
+-- Damage player and fire health update (convenience function for combat)
+function ShopService.damagePlayer(player: Player, amount: number): number
+	local newHealth = PlayerData.damage(player, amount)
+	ShopService.fireHealthUpdate(player)
+	return newHealth
+end
+
+-- Heal player and fire health update
+function ShopService.healPlayer(player: Player, amount: number): number
+	local newHealth = PlayerData.heal(player, amount)
+	ShopService.fireHealthUpdate(player)
+	return newHealth
+end
+
+-- Reset player health to max
+function ShopService.resetPlayerHealth(player: Player): number
+	local newHealth = PlayerData.resetHealth(player)
+	ShopService.fireHealthUpdate(player)
+	return newHealth
 end
 
 return ShopService

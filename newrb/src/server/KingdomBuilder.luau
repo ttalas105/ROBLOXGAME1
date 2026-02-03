@@ -508,11 +508,12 @@ local function createArenaDoor(config: any): Model
 	arch.Material = Enum.Material.Slate
 	arch.Parent = door
 	
-	-- Wooden doors
+	-- Wooden doors (Arena 1: positioned "open" to the sides; others: closed)
+	local doorOffset = (config.name == "Arena1") and 6 or 3  -- open = further out
 	local doorLeft = Instance.new("Part")
 	doorLeft.Name = "DoorLeft"
 	doorLeft.Size = Vector3.new(5, 18, 1.5)
-	doorLeft.Position = config.position + rotateOffset(Vector3.new(-3, 9, 0))
+	doorLeft.Position = config.position + rotateOffset(Vector3.new(-doorOffset, 9, 0))
 	doorLeft.Orientation = Vector3.new(0, rotation, 0)
 	doorLeft.Anchored = true
 	doorLeft.Color = COLORS.darkWood
@@ -522,56 +523,58 @@ local function createArenaDoor(config: any): Model
 	local doorRight = Instance.new("Part")
 	doorRight.Name = "DoorRight"
 	doorRight.Size = Vector3.new(5, 18, 1.5)
-	doorRight.Position = config.position + rotateOffset(Vector3.new(3, 9, 0))
+	doorRight.Position = config.position + rotateOffset(Vector3.new(doorOffset, 9, 0))
 	doorRight.Orientation = Vector3.new(0, rotation, 0)
 	doorRight.Anchored = true
 	doorRight.Color = COLORS.darkWood
 	doorRight.Material = Enum.Material.Wood
 	doorRight.Parent = door
 	
-	-- Metal bands on doors
-	for i = 1, 3 do
-		local bandLeft = Instance.new("Part")
-		bandLeft.Name = "BandLeft_" .. i
-		bandLeft.Size = Vector3.new(5.2, 0.8, 1.7)
-		bandLeft.Position = config.position + rotateOffset(Vector3.new(-3, 3 + i * 5, 0))
-		bandLeft.Orientation = Vector3.new(0, rotation, 0)
-		bandLeft.Anchored = true
-		bandLeft.Color = COLORS.iron
-		bandLeft.Material = Enum.Material.Metal
-		bandLeft.Parent = door
+	-- Metal bands on doors (skip for Arena 1 open look)
+	if config.name ~= "Arena1" then
+		for i = 1, 3 do
+			local bandLeft = Instance.new("Part")
+			bandLeft.Name = "BandLeft_" .. i
+			bandLeft.Size = Vector3.new(5.2, 0.8, 1.7)
+			bandLeft.Position = config.position + rotateOffset(Vector3.new(-3, 3 + i * 5, 0))
+			bandLeft.Orientation = Vector3.new(0, rotation, 0)
+			bandLeft.Anchored = true
+			bandLeft.Color = COLORS.iron
+			bandLeft.Material = Enum.Material.Metal
+			bandLeft.Parent = door
+			
+			local bandRight = Instance.new("Part")
+			bandRight.Name = "BandRight_" .. i
+			bandRight.Size = Vector3.new(5.2, 0.8, 1.7)
+			bandRight.Position = config.position + rotateOffset(Vector3.new(3, 3 + i * 5, 0))
+			bandRight.Orientation = Vector3.new(0, rotation, 0)
+			bandRight.Anchored = true
+			bandRight.Color = COLORS.iron
+			bandRight.Material = Enum.Material.Metal
+			bandRight.Parent = door
+		end
 		
-		local bandRight = Instance.new("Part")
-		bandRight.Name = "BandRight_" .. i
-		bandRight.Size = Vector3.new(5.2, 0.8, 1.7)
-		bandRight.Position = config.position + rotateOffset(Vector3.new(3, 3 + i * 5, 0))
-		bandRight.Orientation = Vector3.new(0, rotation, 0)
-		bandRight.Anchored = true
-		bandRight.Color = COLORS.iron
-		bandRight.Material = Enum.Material.Metal
-		bandRight.Parent = door
+		-- Door handles (closed doors only)
+		local handleLeft = Instance.new("Part")
+		handleLeft.Name = "HandleLeft"
+		handleLeft.Shape = Enum.PartType.Ball
+		handleLeft.Size = Vector3.new(1.5, 1.5, 1.5)
+		handleLeft.Position = config.position + rotateOffset(Vector3.new(-1.5, 10, 1))
+		handleLeft.Anchored = true
+		handleLeft.Color = COLORS.gold
+		handleLeft.Material = Enum.Material.Metal
+		handleLeft.Parent = door
+		
+		local handleRight = Instance.new("Part")
+		handleRight.Name = "HandleRight"
+		handleRight.Shape = Enum.PartType.Ball
+		handleRight.Size = Vector3.new(1.5, 1.5, 1.5)
+		handleRight.Position = config.position + rotateOffset(Vector3.new(1.5, 10, 1))
+		handleRight.Anchored = true
+		handleRight.Color = COLORS.gold
+		handleRight.Material = Enum.Material.Metal
+		handleRight.Parent = door
 	end
-	
-	-- Door handles
-	local handleLeft = Instance.new("Part")
-	handleLeft.Name = "HandleLeft"
-	handleLeft.Shape = Enum.PartType.Ball
-	handleLeft.Size = Vector3.new(1.5, 1.5, 1.5)
-	handleLeft.Position = config.position + rotateOffset(Vector3.new(-1.5, 10, 1))
-	handleLeft.Anchored = true
-	handleLeft.Color = COLORS.gold
-	handleLeft.Material = Enum.Material.Metal
-	handleLeft.Parent = door
-	
-	local handleRight = Instance.new("Part")
-	handleRight.Name = "HandleRight"
-	handleRight.Shape = Enum.PartType.Ball
-	handleRight.Size = Vector3.new(1.5, 1.5, 1.5)
-	handleRight.Position = config.position + rotateOffset(Vector3.new(1.5, 10, 1))
-	handleRight.Anchored = true
-	handleRight.Color = COLORS.gold
-	handleRight.Material = Enum.Material.Metal
-	handleRight.Parent = door
 	
 	-- Torches on either side
 	local torchLeft = createTorch(config.position + rotateOffset(Vector3.new(-10, 12, 0)), config.color)
@@ -604,22 +607,37 @@ local function createArenaDoor(config: any): Model
 	statusLabel.Size = UDim2.new(1, 0, 0.3, 0)
 	statusLabel.Position = UDim2.new(0, 0, 0.7, 0)
 	statusLabel.BackgroundTransparency = 1
-	statusLabel.Text = "🔒 COMING SOON"
-	statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-	statusLabel.TextSize = 20
+	statusLabel.Text = config.name == "Arena1" and "WALK THROUGH TO ENTER" or "🔒 COMING SOON"
+	statusLabel.TextColor3 = config.name == "Arena1" and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(150, 150, 150)
+	statusLabel.TextSize = 18
 	statusLabel.Font = Enum.Font.GothamBold
 	statusLabel.TextStrokeTransparency = 0.3
 	statusLabel.Parent = billboard
 	
-	-- Locked chains (visual)
-	local chain = Instance.new("Part")
-	chain.Name = "Chain"
-	chain.Size = Vector3.new(8, 1, 1)
-	chain.Position = config.position + Vector3.new(0, 10, 1.5)
-	chain.Anchored = true
-	chain.Color = COLORS.iron
-	chain.Material = Enum.Material.Metal
-	chain.Parent = door
+	-- Arena 1: invisible trigger - walk through to teleport (wired in init.server)
+	if config.name == "Arena1" then
+		local trigger = Instance.new("Part")
+		trigger.Name = "Arena1Trigger"
+		trigger.Size = Vector3.new(12, 20, 8)
+		trigger.Position = config.position + rotateOffset(Vector3.new(0, 10, 5))
+		trigger.Orientation = Vector3.new(0, rotation, 0)
+		trigger.Anchored = true
+		trigger.CanCollide = false
+		trigger.Transparency = 1
+		trigger.Parent = door
+	end
+	
+	-- Locked chains (visual) only for arenas that aren't Arena1
+	if config.name ~= "Arena1" then
+		local chain = Instance.new("Part")
+		chain.Name = "Chain"
+		chain.Size = Vector3.new(8, 1, 1)
+		chain.Position = config.position + Vector3.new(0, 10, 1.5)
+		chain.Anchored = true
+		chain.Color = COLORS.iron
+		chain.Material = Enum.Material.Metal
+		chain.Parent = door
+	end
 	
 	return door
 end
@@ -691,7 +709,7 @@ function KingdomBuilder.build(Remotes: any)
 	end
 	
 	-- Clean up any existing kingdom elements
-	for _, name in {"KingdomGround", "CastleWalls", "Decorations", "Shops", "ArenaDoors", "Moon"} do
+	for _, name in {"KingdomGround", "CastleWalls", "Decorations", "Shops", "ArenaDoors", "Arena1", "Moon"} do
 		local existing = workspace:FindFirstChild(name)
 		if existing then existing:Destroy() end
 	end
@@ -756,7 +774,7 @@ function KingdomBuilder.build(Remotes: any)
 	local arenaConfigs = {
 		{
 			name = "Arena1",
-			displayName = "⚔️ ARENA I",
+			displayName = "Farmland Frenzy",
 			position = Vector3.new(0, 0, -70),
 			color = COLORS.bloodRed,
 		},

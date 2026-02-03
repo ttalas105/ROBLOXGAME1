@@ -51,6 +51,9 @@ if not ShopService then return end
 local KingdomBuilder = safeRequire("KingdomBuilder")
 if not KingdomBuilder then return end
 
+local Arena1Builder = safeRequire("Arena1Builder")
+if not Arena1Builder then return end
+
 -- Start the shop service (creates remotes and connects handlers)
 ShopService.start()
 print("[Server] ShopService started")
@@ -59,8 +62,69 @@ print("[Server] ShopService started")
 KingdomBuilder.build(Remotes)
 print("[Server] Dark Fantasy Kingdom built")
 
--- Setup players when they join
+-- Build Arena 1 (farmland) and wire teleports
+Arena1Builder.build()
+-- Force hub nighttime on start (daylight only when in Arena 1)
+Arena1Builder.setDaylight(false)
+local hubReturnPos = Vector3.new(0, 5, 0)
+
+-- Arena 1 door: walk-through trigger teleports to farmland
 local Players = game:GetService("Players")
+local lastArena1Teleport: { [Player]: number } = {}
+local TELEPORT_DEBOUNCE = 2
+local arenaDoors = workspace:WaitForChild("ArenaDoors", 5)
+if arenaDoors then
+	local arena1Door = arenaDoors:FindFirstChild("Arena1_Door")
+	if arena1Door then
+		local trigger = arena1Door:FindFirstChild("Arena1Trigger")
+		if trigger and trigger:IsA("BasePart") then
+			trigger.Touched:Connect(function(otherPart: BasePart)
+				local char = otherPart.Parent
+				if not char or not char:IsA("Model") then return end
+				local humanoid = char:FindFirstChild("Humanoid")
+				if not humanoid then return end
+				local player = Players:GetPlayerFromCharacter(char)
+				if not player then return end
+				local now = tick()
+				if lastArena1Teleport[player] and (now - lastArena1Teleport[player]) < TELEPORT_DEBOUNCE then return end
+				lastArena1Teleport[player] = now
+				local root = char:FindFirstChild("HumanoidRootPart")
+				if root then
+					-- Teleport to arena spawn platform (guaranteed solid)
+					local arena1 = workspace:FindFirstChild("Arena1")
+					local spawnPart = arena1 and arena1:FindFirstChild("SpawnPoint")
+					local targetPos = if spawnPart and spawnPart:IsA("BasePart")
+						then (spawnPart.Position + Vector3.new(0, spawnPart.Size.Y/2 + 2, 0))
+						else Arena1Builder.getSpawnPosition()
+					root.CFrame = CFrame.new(targetPos)
+					Arena1Builder.setDaylight(true)
+					print("[Server] Teleported", player.Name, "to Arena 1")
+				end
+			end)
+		end
+	end
+end
+
+-- Arena 1 return pad: teleport back to hub
+local arena1 = workspace:WaitForChild("Arena1", 5)
+if arena1 then
+	local returnPad = arena1:FindFirstChild("ReturnToHubPad")
+	if returnPad then
+		local prompt = returnPad:FindFirstChild("ReturnPrompt")
+		if prompt and prompt:IsA("ProximityPrompt") then
+			prompt.Triggered:Connect(function(player: Player)
+				local char = player.Character
+				if char and char:FindFirstChild("HumanoidRootPart") then
+					char.HumanoidRootPart.CFrame = CFrame.new(hubReturnPos)
+					Arena1Builder.setDaylight(false)
+					print("[Server] Teleported", player.Name, "back to hub")
+				end
+			end)
+		end
+	end
+end
+
+-- Setup players when they join
 Players.PlayerAdded:Connect(function(player)
 	print("[Server] Player joined:", player.Name)
 	

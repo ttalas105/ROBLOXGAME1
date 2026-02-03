@@ -9,6 +9,7 @@ export type WeaponInstance = { weaponId: string, uid: string }
 
 export type PlayerDataState = {
 	keys: number,
+	gems: number,
 	xp: number,
 	weapons: { WeaponInstance },
 	crates: { [string]: number }, -- crateId -> count
@@ -33,6 +34,7 @@ local function getOrCreate(player: Player): PlayerDataState
 	if not dataByPlayer[player] then
 		dataByPlayer[player] = {
 			keys = Config.StartingKeys,
+			gems = Config.StartingGems,
 			xp = Config.StartingXP,
 			weapons = {},
 			crates = {},
@@ -64,6 +66,24 @@ function PlayerData.spendKeys(player: Player, amount: number): boolean
 	local d = getOrCreate(player)
 	if d.keys < amount then return false end
 	d.keys -= amount
+	return true
+end
+
+-- Gems
+function PlayerData.getGems(player: Player): number
+	return getOrCreate(player).gems
+end
+
+function PlayerData.addGems(player: Player, amount: number): number
+	local d = getOrCreate(player)
+	d.gems += amount
+	return d.gems
+end
+
+function PlayerData.spendGems(player: Player, amount: number): boolean
+	local d = getOrCreate(player)
+	if d.gems < amount then return false end
+	d.gems -= amount
 	return true
 end
 
@@ -146,9 +166,8 @@ function PlayerData.getWeaponCount(player: Player): number
 end
 
 function PlayerData.getMaxInventorySlots(player: Player): number
-	local d = getOrCreate(player)
-	local expansionLevel = d.upgrades["inventory_expansion"] or 0
-	return Config.BaseInventorySlots + (expansionLevel * 10)
+	-- Fixed at 10 slots, no upgrades
+	return Config.BaseInventorySlots
 end
 
 function PlayerData.hasInventorySpace(player: Player): boolean

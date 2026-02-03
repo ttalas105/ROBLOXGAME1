@@ -83,6 +83,7 @@ local function stateForClient(player: Player)
 	local d = PlayerData.get(player)
 	return {
 		keys = d.keys,
+		gems = d.gems,
 		xp = d.xp,
 		weapons = d.weapons,
 		crates = d.crates,

@@ -248,6 +248,169 @@ Config.Crates = {
 			"thomass_fang_of_twin_realms", "aydins_gilded_dominion", "aryas_courtmaster_chakram", "kims_architect_of_whispers", "salims_equilibrium_staff",
 		},
 	},
+	case5 = {
+		id = "case5",
+		name = "Case 5",
+		keyCost = 5000,
+		description = "",
+		rarityChances = {
+			Common = 55,
+			Rare = 39.5,
+			Epic = 4.2,
+			Legendary = 0.8,
+			Exotic = 0.3,
+			Divine = 0.2,
+		},
+		weaponPool = {
+			-- Common
+			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
+			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			-- Rare
+			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
+			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
+			-- Epic
+			"blazefang_sword", "stormcaller_spear", "gravewarden_axe", "frostbound_bow", "blood_moon_scythe",
+			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
+			-- Legendary
+			"dragonheart_greatsword", "tempest_glaive", "reaper_king_scythe", "celestial_longbow", "obsidian_colossus_hammer",
+			"voidfang_daggers", "phoenix_blade", "thunderlord_mace", "blood_oath_spear", "spectral_greatshield",
+			-- Exotic
+			"chrono_blade", "soul_devourer_scythe", "eclipse_bow", "storm_gods_hammer", "void_monarch_daggers",
+			"infernal_tyrant_sword", "plaguebearer_flail", "astral_lance", "grim_covenant_axe", "worldrender_greatsword",
+			-- Divine
+			"anris_blade_of_ascension", "arbels_astral_singularity", "farids_titanbreaker_gauntlets", "rajans_mindweaver_blade",
+			"thomass_fang_of_twin_realms", "aydins_gilded_dominion", "aryas_courtmaster_chakram", "kims_architect_of_whispers", "salims_equilibrium_staff",
+		},
+	},
+	case6 = {
+		id = "case6",
+		name = "Case 6",
+		keyCost = 10000,
+		description = "",
+		rarityChances = {
+			Common = 49,
+			Rare = 41,
+			Epic = 8.5,
+			Legendary = 1,
+			Exotic = 0.3,
+			Divine = 0.2,
+		},
+		weaponPool = {
+			-- Common
+			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
+			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			-- Rare
+			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
+			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
+			-- Epic
+			"blazefang_sword", "stormcaller_spear", "gravewarden_axe", "frostbound_bow", "blood_moon_scythe",
+			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
+			-- Legendary
+			"dragonheart_greatsword", "tempest_glaive", "reaper_king_scythe", "celestial_longbow", "obsidian_colossus_hammer",
+			"voidfang_daggers", "phoenix_blade", "thunderlord_mace", "blood_oath_spear", "spectral_greatshield",
+			-- Exotic
+			"chrono_blade", "soul_devourer_scythe", "eclipse_bow", "storm_gods_hammer", "void_monarch_daggers",
+			"infernal_tyrant_sword", "plaguebearer_flail", "astral_lance", "grim_covenant_axe", "worldrender_greatsword",
+			-- Divine
+			"anris_blade_of_ascension", "arbels_astral_singularity", "farids_titanbreaker_gauntlets", "rajans_mindweaver_blade",
+			"thomass_fang_of_twin_realms", "aydins_gilded_dominion", "aryas_courtmaster_chakram", "kims_architect_of_whispers", "salims_equilibrium_staff",
+		},
+	},
+	case7 = {
+		id = "case7",
+		name = "Case 7",
+		keyCost = 15000,
+		description = "Unlocked after defeating Arena 2",
+		requiresArena = 2,
+		weaponPool = {
+			-- Common
+			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
+			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			-- Rare
+			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
+			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
+			-- Epic
+			"blazefang_sword", "stormcaller_spear", "gravewarden_axe", "frostbound_bow", "blood_moon_scythe",
+			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
+			-- Legendary
+			"dragonheart_greatsword", "tempest_glaive", "reaper_king_scythe", "celestial_longbow", "obsidian_colossus_hammer",
+			"voidfang_daggers", "phoenix_blade", "thunderlord_mace", "blood_oath_spear", "spectral_greatshield",
+			-- Exotic
+			"chrono_blade", "soul_devourer_scythe", "eclipse_bow", "storm_gods_hammer", "void_monarch_daggers",
+			"infernal_tyrant_sword", "plaguebearer_flail", "astral_lance", "grim_covenant_axe", "worldrender_greatsword",
+			-- Divine
+			"anris_blade_of_ascension", "arbels_astral_singularity", "farids_titanbreaker_gauntlets", "rajans_mindweaver_blade",
+			"thomass_fang_of_twin_realms", "aydins_gilded_dominion", "aryas_courtmaster_chakram", "kims_architect_of_whispers", "salims_equilibrium_staff",
+		},
+	},
+	case8 = {
+		id = "case8",
+		name = "Case 8",
+		keyCost = 25000,
+		description = "",
+		rarityChances = {
+			Common = 33,
+			Rare = 43,
+			Epic = 22,
+			Legendary = 1.5,
+			Exotic = 0.3,
+			Divine = 0.2,
+		},
+		weaponPool = {
+			-- Common
+			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
+			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			-- Rare
+			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
+			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
+			-- Epic
+			"blazefang_sword", "stormcaller_spear", "gravewarden_axe", "frostbound_bow", "blood_moon_scythe",
+			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
+			-- Legendary
+			"dragonheart_greatsword", "tempest_glaive", "reaper_king_scythe", "celestial_longbow", "obsidian_colossus_hammer",
+			"voidfang_daggers", "phoenix_blade", "thunderlord_mace", "blood_oath_spear", "spectral_greatshield",
+			-- Exotic
+			"chrono_blade", "soul_devourer_scythe", "eclipse_bow", "storm_gods_hammer", "void_monarch_daggers",
+			"infernal_tyrant_sword", "plaguebearer_flail", "astral_lance", "grim_covenant_axe", "worldrender_greatsword",
+			-- Divine
+			"anris_blade_of_ascension", "arbels_astral_singularity", "farids_titanbreaker_gauntlets", "rajans_mindweaver_blade",
+			"thomass_fang_of_twin_realms", "aydins_gilded_dominion", "aryas_courtmaster_chakram", "kims_architect_of_whispers", "salims_equilibrium_staff",
+		},
+	},
+	case9 = {
+		id = "case9",
+		name = "Case 9",
+		keyCost = 50000,
+		description = "",
+		rarityChances = {
+			Common = 25,
+			Rare = 43,
+			Epic = 28,
+			Legendary = 3,
+			Exotic = 0.5,
+			Divine = 0.5,
+		},
+		weaponPool = {
+			-- Common
+			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
+			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			-- Rare
+			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
+			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
+			-- Epic
+			"blazefang_sword", "stormcaller_spear", "gravewarden_axe", "frostbound_bow", "blood_moon_scythe",
+			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
+			-- Legendary
+			"dragonheart_greatsword", "tempest_glaive", "reaper_king_scythe", "celestial_longbow", "obsidian_colossus_hammer",
+			"voidfang_daggers", "phoenix_blade", "thunderlord_mace", "blood_oath_spear", "spectral_greatshield",
+			-- Exotic
+			"chrono_blade", "soul_devourer_scythe", "eclipse_bow", "storm_gods_hammer", "void_monarch_daggers",
+			"infernal_tyrant_sword", "plaguebearer_flail", "astral_lance", "grim_covenant_axe", "worldrender_greatsword",
+			-- Divine
+			"anris_blade_of_ascension", "arbels_astral_singularity", "farids_titanbreaker_gauntlets", "rajans_mindweaver_blade",
+			"thomass_fang_of_twin_realms", "aydins_gilded_dominion", "aryas_courtmaster_chakram", "kims_architect_of_whispers", "salims_equilibrium_staff",
+		},
+	},
 }
 
 -- Upgrades (bought with XP)
@@ -299,7 +462,8 @@ Config.Upgrades = {
 }
 
 -- Starting currency
-Config.StartingKeys = 10000
+Config.StartingKeys = 1000000
+Config.StartingGems = 0
 Config.StartingXP = 100
 Config.BaseInventorySlots = 10
 

@@ -8,6 +8,8 @@ print("[Client] Starting shop client...")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -70,6 +72,15 @@ if not InventoryBar then return end
 local HealthBar = safeRequire("HealthBar")
 if not HealthBar then return end
 
+local CurrencyDisplay = safeRequire("CurrencyDisplay")
+if not CurrencyDisplay then return end
+
+local InventoryWindow = safeRequire("InventoryWindow")
+if not InventoryWindow then return end
+
+local InventoryButton = safeRequire("InventoryButton")
+if not InventoryButton then return end
+
 print("[Client] All modules loaded, building UIs...")
 
 -- Build all shop UIs (hidden by default)
@@ -78,7 +89,11 @@ SellShop.build(playerGui)
 UpgradesShop.build(playerGui)
 CrateOpener.build(playerGui)
 InventoryBar.build(playerGui)
+InventoryBar.hide() -- Hide the bottom inventory bar
+InventoryWindow.build(playerGui)
+InventoryButton.build(playerGui, InventoryWindow)
 HealthBar.build(playerGui)
+CurrencyDisplay.build(playerGui)
 
 -- Connect inventory bar to crate opener (to hide pending weapons)
 InventoryBar.setCrateOpener(CrateOpener)
@@ -91,6 +106,7 @@ InventoryBar.setCrateOpener(CrateOpener)
 -- Default state for initial refresh
 local DEFAULT_STATE = {
 	keys = 0,
+	gems = 0,
 	xp = 0,
 	weapons = {},
 	crates = {},
@@ -106,12 +122,22 @@ local function refreshAllShops(state: any)
 	CrateShop.refresh(state)
 	SellShop.refresh(state)
 	UpgradesShop.refresh(state)
-	InventoryBar.refresh(state)
+	InventoryBar.refresh(state) -- Keep for crate opener compatibility
+	InventoryWindow.refresh(state) -- Update inventory window
+	-- Update currency display
+	if state.gems ~= nil or state.keys ~= nil then
+		CurrencyDisplay.update(state.gems, state.keys)
+	end
+	-- Update health bar if health data is included
+	if state.health and state.maxHealth then
+		HealthBar.update(state.health, state.maxHealth)
+	end
 end
 
 -- Refresh inventory when a weapon is revealed from crate opening
 CrateOpener.setOnWeaponRevealed(function()
-	InventoryBar.refresh(currentState)
+	InventoryBar.refresh(currentState) -- Keep for compatibility
+	InventoryWindow.refresh(currentState) -- Update inventory window
 end)
 
 -- Close all shops
@@ -144,10 +170,6 @@ end)
 ShopRemotes.playerDataUpdated().OnClientEvent:Connect(function(newState)
 	print("[Client] Player data updated")
 	refreshAllShops(newState)
-	-- Update health bar if health data is included
-	if newState.health and newState.maxHealth then
-		HealthBar.update(newState.health, newState.maxHealth)
-	end
 end)
 
 -- Listen for health updates specifically (for combat damage/healing)
@@ -170,10 +192,13 @@ task.spawn(function()
 		else
 			HealthBar.setHealth(100, 100) -- Default
 		end
+		-- Set initial currency
+		CurrencyDisplay.update(state.gems or 0, state.keys or 0)
 	else
 		warn("[Client] Could not fetch player data, using defaults")
 		refreshAllShops(DEFAULT_STATE)
 		HealthBar.setHealth(100, 100)
+		CurrencyDisplay.update(0, 0)
 	end
 end)
 
@@ -186,6 +211,38 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			closeAllShops()
 		end
 	end
+end)
+
+-- Check player location periodically to show/hide currency display and inventory button
+local lastLocationCheck = 0
+local function checkLocation()
+	-- Throttle checks to every 0.5 seconds
+	local now = tick()
+	if now - lastLocationCheck < 0.5 then return end
+	lastLocationCheck = now
+	
+	local inHub = CurrencyDisplay.isInHub(player)
+	
+	-- Show currency only in hub (not in arena)
+	if inHub then
+		CurrencyDisplay.show()
+		InventoryButton.show()
+	else
+		CurrencyDisplay.hide()
+		InventoryButton.hide()
+		InventoryWindow.hide() -- Also close inventory window if in arena
+	end
+end
+
+-- Check location periodically
+RunService.Heartbeat:Connect(function()
+	checkLocation()
+end)
+
+-- Initial location check
+task.spawn(function()
+	task.wait(1)
+	checkLocation()
 end)
 
 print("[Client] ✅ Shop client ready!")

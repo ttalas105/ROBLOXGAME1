@@ -40,11 +40,11 @@ local function createBorderPiece(name: string, size: UDim2, position: UDim2, col
 	return piece
 end
 
--- Create heart icon (simple pixel heart)
+-- Create heart icon (simple pixel heart, scaled down)
 local function createHeart(name: string, position: UDim2, parent: Instance): Frame
 	local heart = Instance.new("Frame")
 	heart.Name = name
-	heart.Size = UDim2.new(0, 20, 0, 18)
+	heart.Size = UDim2.new(0, 15, 0, 13)
 	heart.Position = position
 	heart.BackgroundTransparency = 1
 	heart.Parent = parent
@@ -83,11 +83,11 @@ function HealthBar.build(playerGui: PlayerGui)
 	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	screenGui.Parent = playerGui
 	
-	-- Main container - top right
+	-- Main container - all the way top right (smaller)
 	local container = Instance.new("Frame")
 	container.Name = "Container"
-	container.Size = UDim2.new(0, 320, 0, 60)
-	container.Position = UDim2.new(1, -340, 0, 20)
+	container.Size = UDim2.new(0, 240, 0, 45)
+	container.Position = UDim2.new(1, -250, 0, 5)
 	container.BackgroundTransparency = 1
 	container.Parent = screenGui
 	
@@ -100,34 +100,34 @@ function HealthBar.build(playerGui: PlayerGui)
 	outerFrame.BorderSizePixel = 0
 	outerFrame.Parent = container
 	
-	-- Create jagged/ornate edge effect with multiple border pieces
+	-- Create jagged/ornate edge effect with multiple border pieces (scaled down)
 	-- Top edge decorations
-	for i = 0, 9 do
+	for i = 0, 6 do
 		local spike = createBorderPiece(
 			"TopSpike" .. i,
-			UDim2.new(0, 8, 0, 6),
-			UDim2.new(0, 20 + i * 30, 0, -4),
+			UDim2.new(0, 6, 0, 4),
+			UDim2.new(0, 15 + i * 35, 0, -3),
 			COLORS.frameDark,
 			outerFrame
 		)
 	end
 	
 	-- Bottom edge decorations
-	for i = 0, 9 do
+	for i = 0, 6 do
 		local spike = createBorderPiece(
 			"BottomSpike" .. i,
-			UDim2.new(0, 8, 0, 6),
-			UDim2.new(0, 20 + i * 30, 1, -2),
+			UDim2.new(0, 6, 0, 4),
+			UDim2.new(0, 15 + i * 35, 1, -1),
 			COLORS.frameDark,
 			outerFrame
 		)
 	end
 	
-	-- Left decorative piece
-	local leftDeco = createBorderPiece("LeftDeco", UDim2.new(0, 12, 0, 40), UDim2.new(0, -8, 0.5, -20), COLORS.frameDark, outerFrame)
+	-- Left decorative piece (scaled down)
+	local leftDeco = createBorderPiece("LeftDeco", UDim2.new(0, 8, 0, 30), UDim2.new(0, -6, 0.5, -15), COLORS.frameDark, outerFrame)
 	
-	-- Right decorative piece  
-	local rightDeco = createBorderPiece("RightDeco", UDim2.new(0, 12, 0, 40), UDim2.new(1, -4, 0.5, -20), COLORS.frameDark, outerFrame)
+	-- Right decorative piece (scaled down)
+	local rightDeco = createBorderPiece("RightDeco", UDim2.new(0, 8, 0, 30), UDim2.new(1, -2, 0.5, -15), COLORS.frameDark, outerFrame)
 	
 	-- Inner accent border
 	local accentBorder = Instance.new("Frame")
@@ -176,11 +176,11 @@ function HealthBar.build(playerGui: PlayerGui)
 	shine.BorderSizePixel = 0
 	shine.Parent = healthFill
 	
-	-- Hearts on ends
-	createHeart("LeftHeart", UDim2.new(0, -5, 0.5, -9), outerFrame)
-	createHeart("RightHeart", UDim2.new(1, -15, 0.5, -9), outerFrame)
+	-- Hearts on ends (scaled down)
+	createHeart("LeftHeart", UDim2.new(0, -3, 0.5, -7), outerFrame)
+	createHeart("RightHeart", UDim2.new(1, -12, 0.5, -7), outerFrame)
 	
-	-- Health text (centered)
+	-- Health text (centered, smaller)
 	healthText = Instance.new("TextLabel")
 	healthText.Name = "HealthText"
 	healthText.Size = UDim2.new(1, 0, 1, 0)
@@ -188,7 +188,7 @@ function HealthBar.build(playerGui: PlayerGui)
 	healthText.BackgroundTransparency = 1
 	healthText.Text = "100 / 100"
 	healthText.TextColor3 = COLORS.textWhite
-	healthText.TextSize = 18
+	healthText.TextSize = 14
 	healthText.Font = Enum.Font.GothamBold
 	healthText.TextStrokeColor3 = COLORS.textShadow
 	healthText.TextStrokeTransparency = 0.3

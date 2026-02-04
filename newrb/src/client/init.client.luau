@@ -81,6 +81,12 @@ if not InventoryWindow then return end
 local InventoryButton = safeRequire("InventoryButton")
 if not InventoryButton then return end
 
+-- Dash (Q key) - loads and runs on require
+local Dash = safeRequire("Dash")
+if not Dash then
+	warn("[Client] Dash module not found - Q dash disabled")
+end
+
 print("[Client] All modules loaded, building UIs...")
 
 -- Build all shop UIs (hidden by default)

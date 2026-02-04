@@ -1,5 +1,5 @@
 --[[
-	Dash: Press Q to dash 10 studs in look direction. Includes dash animation and cooldown.
+	Dash: Press Q to dash 10 studs in movement direction. Includes dash animation and cooldown.
 ]]
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -54,23 +54,27 @@ local function performDash()
 	local now = tick()
 	if now < dashCooldownEnd then return end
 
-	-- Direction: camera look, flattened to horizontal
-	local cam = workspace.CurrentCamera
-	local look = if cam then cam.CFrame.LookVector else root.CFrame.LookVector
-	look = Vector3.new(look.X, 0, look.Z)
-	if look.Magnitude < 0.01 then return end
-	look = look.Unit
+	-- Direction: use movement direction (WASD), fallback to character facing if not moving
+	local moveDir = humanoid.MoveDirection
+	if moveDir.Magnitude < 0.01 then
+		-- Not moving, use character's facing direction
+		moveDir = root.CFrame.LookVector
+	end
+	-- Flatten to horizontal
+	moveDir = Vector3.new(moveDir.X, 0, moveDir.Z)
+	if moveDir.Magnitude < 0.01 then return end
+	moveDir = moveDir.Unit
 
 	local startPos = root.Position
-	local endPos = startPos + look * DASH_DISTANCE
+	local endPos = startPos + moveDir * DASH_DISTANCE
 
 	-- Optional: raycast to stop at walls
 	local params = RaycastParams.new()
 	params.FilterDescendantsInstances = { player.Character }
 	params.FilterType = Enum.RaycastFilterType.Exclude
-	local result = workspace:Raycast(startPos, look * DASH_DISTANCE, params)
+	local result = workspace:Raycast(startPos, moveDir * DASH_DISTANCE, params)
 	if result then
-		endPos = result.Position - look * 2
+		endPos = result.Position - moveDir * 2
 	end
 
 	dashCooldownEnd = now + DASH_COOLDOWN

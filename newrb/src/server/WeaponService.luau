@@ -21,7 +21,7 @@ local equippedWeapons: { [Player]: { weaponId: string, uid: string, model: Model
 -- Attack cooldown per player
 local attackCooldowns: { [Player]: number } = {}
 local ATTACK_COOLDOWN = 0.5 -- seconds between attacks
-local ATTACK_RANGE = 8 -- studs
+local ATTACK_RANGE = 5 -- studs (must be close to hit)
 
 -- Get weapon models folder (created in ReplicatedStorage for client access)
 local function getWeaponModelsFolder(): Folder?
@@ -227,7 +227,7 @@ function WeaponService.processAttack(player: Player, targetPosition: Vector3?)
 								damage = damage,
 							})
 							
-							print("[WeaponService]", player.Name, "hit NPC for", damage, "damage")
+							print("[WeaponService]", player.Name, "hit NPC for", damage, "damage (distance:", math.floor(distance), "studs)")
 						end
 					end
 				end

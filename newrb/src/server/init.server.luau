@@ -57,6 +57,9 @@ if not Arena1Builder then return end
 local WeaponService = safeRequire("WeaponService")
 if not WeaponService then return end
 
+local ZombieAI = safeRequire("ZombieAI")
+if not ZombieAI then return end
+
 -- Start the shop service (creates remotes and connects handlers)
 ShopService.start()
 print("[Server] ShopService started")
@@ -64,6 +67,10 @@ print("[Server] ShopService started")
 -- Start the weapon service (equip, attack, combat)
 WeaponService.init()
 print("[Server] WeaponService started")
+
+-- Start the zombie AI (spawns zombies in Arena 1)
+ZombieAI.init()
+print("[Server] ZombieAI started")
 
 -- Build the Dark Fantasy Kingdom environment
 KingdomBuilder.build(Remotes)
@@ -105,6 +112,8 @@ if arenaDoors then
 						else Arena1Builder.getSpawnPosition()
 					root.CFrame = CFrame.new(targetPos)
 					Arena1Builder.setDaylight(true)
+					-- Spawn zombies when player enters arena
+					ZombieAI.onPlayerEnterArena(player)
 					print("[Server] Teleported", player.Name, "to Arena 1")
 				end
 			end)
@@ -124,6 +133,8 @@ if arena1 then
 				if char and char:FindFirstChild("HumanoidRootPart") then
 					char.HumanoidRootPart.CFrame = CFrame.new(hubReturnPos)
 					Arena1Builder.setDaylight(false)
+					-- Clear zombies if no players left in arena
+					ZombieAI.onPlayerLeaveArena(player)
 					print("[Server] Teleported", player.Name, "back to hub")
 				end
 			end)

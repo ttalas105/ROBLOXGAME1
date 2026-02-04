@@ -10,9 +10,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local StarterGui = game:GetService("StarterGui")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+
+-- Hide default Roblox health bar (we use our own)
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
 
 -- Wait for shared modules
 local Shared = ReplicatedStorage:WaitForChild("Shared", 10)

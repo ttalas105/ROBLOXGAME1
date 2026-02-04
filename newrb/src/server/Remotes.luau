@@ -72,6 +72,13 @@ function Remotes.createAll()
 	-- Health system
 	Remotes.HealthUpdated = Remotes.createRemoteEvent("HealthUpdated")
 	
+	-- Weapon equip/combat system
+	Remotes.EquipWeapon = Remotes.createRemoteEvent("EquipWeapon")
+	Remotes.UnequipWeapon = Remotes.createRemoteEvent("UnequipWeapon")
+	Remotes.WeaponEquipped = Remotes.createRemoteEvent("WeaponEquipped") -- Server -> Client confirmation
+	Remotes.Attack = Remotes.createRemoteEvent("Attack") -- Client -> Server attack request
+	Remotes.AttackHit = Remotes.createRemoteEvent("AttackHit") -- Server -> All clients for hit effects
+	
 	return Remotes
 end
 

@@ -71,4 +71,25 @@ function ShopRemotes.healthUpdated(): RemoteEvent
 	return getFolder():WaitForChild("HealthUpdated") :: RemoteEvent
 end
 
+-- Weapon equip/combat system
+function ShopRemotes.equipWeapon(): RemoteEvent
+	return getFolder():WaitForChild("EquipWeapon") :: RemoteEvent
+end
+
+function ShopRemotes.unequipWeapon(): RemoteEvent
+	return getFolder():WaitForChild("UnequipWeapon") :: RemoteEvent
+end
+
+function ShopRemotes.weaponEquipped(): RemoteEvent
+	return getFolder():WaitForChild("WeaponEquipped") :: RemoteEvent
+end
+
+function ShopRemotes.attack(): RemoteEvent
+	return getFolder():WaitForChild("Attack") :: RemoteEvent
+end
+
+function ShopRemotes.attackHit(): RemoteEvent
+	return getFolder():WaitForChild("AttackHit") :: RemoteEvent
+end
+
 return ShopRemotes

@@ -87,6 +87,12 @@ if not Dash then
 	warn("[Client] Dash module not found - Q dash disabled")
 end
 
+-- Weapon system (equip, attack, combat)
+local WeaponController = safeRequire("WeaponController")
+if not WeaponController then
+	warn("[Client] WeaponController not found - combat disabled")
+end
+
 print("[Client] All modules loaded, building UIs...")
 
 -- Build all shop UIs (hidden by default)
@@ -103,6 +109,11 @@ CurrencyDisplay.build(playerGui)
 
 -- Connect inventory bar to crate opener (to hide pending weapons)
 InventoryBar.setCrateOpener(CrateOpener)
+
+-- Initialize weapon controller (equip, attack, combat)
+if WeaponController then
+	WeaponController.init()
+end
 
 -- Inventory bar click callback disabled - use Sell Shop to sell weapons
 -- InventoryBar.setClickCallback(function(itemType: string, itemId: string, uid: string?)
@@ -137,6 +148,10 @@ local function refreshAllShops(state: any)
 	-- Update health bar if health data is included
 	if state.health and state.maxHealth then
 		HealthBar.update(state.health, state.maxHealth)
+	end
+	-- Update weapon controller inventory (for 1-9 key equipping)
+	if WeaponController and state.weapons then
+		WeaponController.updateInventory(state.weapons)
 	end
 end
 
@@ -200,6 +215,16 @@ task.spawn(function()
 		end
 		-- Set initial currency
 		CurrencyDisplay.update(state.gems or 0, state.keys or 0)
+		-- Auto-equip first weapon (e.g. starter Wooden Sword)
+		if WeaponController and state.weapons and #state.weapons > 0 then
+			local firstWeapon = state.weapons[1]
+			if firstWeapon and firstWeapon.uid then
+				task.delay(1, function() -- Wait for character to load
+					WeaponController.equipWeapon(firstWeapon.uid)
+					print("[Client] Auto-equipped starting weapon:", firstWeapon.weaponId)
+				end)
+			end
+		end
 	else
 		warn("[Client] Could not fetch player data, using defaults")
 		refreshAllShops(DEFAULT_STATE)

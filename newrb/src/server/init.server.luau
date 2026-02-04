@@ -54,9 +54,16 @@ if not KingdomBuilder then return end
 local Arena1Builder = safeRequire("Arena1Builder")
 if not Arena1Builder then return end
 
+local WeaponService = safeRequire("WeaponService")
+if not WeaponService then return end
+
 -- Start the shop service (creates remotes and connects handlers)
 ShopService.start()
 print("[Server] ShopService started")
+
+-- Start the weapon service (equip, attack, combat)
+WeaponService.init()
+print("[Server] WeaponService started")
 
 -- Build the Dark Fantasy Kingdom environment
 KingdomBuilder.build(Remotes)

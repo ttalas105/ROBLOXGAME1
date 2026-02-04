@@ -30,13 +30,20 @@ end
 
 local BASE_HEALTH = 100
 
+-- Starting weapon for debugging
+local STARTING_WEAPON_ID = "wooden_sword"
+
 local function getOrCreate(player: Player): PlayerDataState
 	if not dataByPlayer[player] then
+		-- Create player data with starting weapon
+		local startingWeaponUid = newUid()
 		dataByPlayer[player] = {
 			keys = Config.StartingKeys,
 			gems = Config.StartingGems,
 			xp = Config.StartingXP,
-			weapons = {},
+			weapons = {
+				{ weaponId = STARTING_WEAPON_ID, uid = startingWeaponUid }, -- Debug starter weapon
+			},
 			crates = {},
 			upgrades = {},
 			arenasCompleted = {},

@@ -1,6 +1,9 @@
 # Project place file
 /robloxgame.rbxlx
 
+# Nested/duplicate project folder (avoids "does not have a commit checked out" when adding)
+/robloxgame/
+
 # Roblox Studio lock files
 /*.rbxlx.lock
 /*.rbxl.lock

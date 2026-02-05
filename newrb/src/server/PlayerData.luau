@@ -1,9 +1,33 @@
 --[[
 	Stores and updates player data: keys, xp, weapons, crates, upgrades.
+	Persists data using DataStore (when available).
+	Falls back to session-only storage in Studio without API access.
 ]]
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local DataStoreService = game:GetService("DataStoreService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+
+-- DataStore setup with Studio fallback
+local DATA_STORE_NAME = "PlayerDataV1"
+local playerDataStore = nil
+local useDataStore = false
+
+-- Try to get DataStore (will fail in Studio without API access enabled)
+local success, result = pcall(function()
+	return DataStoreService:GetDataStore(DATA_STORE_NAME)
+end)
+
+if success and result then
+	playerDataStore = result
+	useDataStore = true
+	print("[PlayerData] DataStore enabled")
+else
+	warn("[PlayerData] DataStore not available (Studio mode) - using session storage only")
+	useDataStore = false
+end
 
 export type WeaponInstance = { weaponId: string, uid: string }
 
@@ -27,46 +51,206 @@ export type PlayerDataState = {
 
 local PlayerData = {}
 local dataByPlayer: { [Player]: PlayerDataState } = {}
+local dataLoadedByPlayer: { [Player]: boolean } = {}
 local nextUid = 0
 
 local function newUid(): string
 	nextUid += 1
-	return "w_" .. tostring(nextUid) .. "_" .. tostring(os.time())
+	return "w_" .. tostring(nextUid) .. "_" .. tostring(os.time()) .. "_" .. tostring(math.random(1000, 9999))
 end
 
 local BASE_HEALTH = 100
 
--- Starting weapon for debugging
+-- Starting weapon
 local STARTING_WEAPON_ID = "wooden_sword"
+
+-- Convert data to saveable format (no metatables, simple types)
+local function serializeData(data: PlayerDataState): { [string]: any }
+	local serialized = {
+		keys = data.keys,
+		gems = data.gems,
+		xp = data.xp,
+		weapons = {},
+		crates = data.crates,
+		upgrades = data.upgrades,
+		arenasCompleted = {},
+		health = data.health,
+		maxHealth = data.maxHealth,
+		assignedBasePlot = data.assignedBasePlot,
+		displayedWeapons = {},
+	}
+	
+	-- Serialize weapons
+	for _, w in data.weapons do
+		table.insert(serialized.weapons, { weaponId = w.weaponId, uid = w.uid })
+	end
+	
+	-- Serialize arenasCompleted (convert number keys to strings for DataStore)
+	for arenaNum, completed in data.arenasCompleted do
+		serialized.arenasCompleted[tostring(arenaNum)] = completed
+	end
+	
+	-- Serialize displayed weapons
+	for _, dw in data.displayedWeapons do
+		table.insert(serialized.displayedWeapons, {
+			pedestalIndex = dw.pedestalIndex,
+			weaponUid = dw.weaponUid,
+			weaponId = dw.weaponId,
+		})
+	end
+	
+	return serialized
+end
+
+-- Convert loaded data back to PlayerDataState
+local function deserializeData(saved: { [string]: any }): PlayerDataState
+	local data: PlayerDataState = {
+		keys = saved.keys or Config.StartingKeys,
+		gems = saved.gems or Config.StartingGems,
+		xp = saved.xp or Config.StartingXP,
+		weapons = {},
+		crates = saved.crates or {},
+		upgrades = saved.upgrades or {},
+		arenasCompleted = {},
+		health = saved.health or BASE_HEALTH,
+		maxHealth = saved.maxHealth or BASE_HEALTH,
+		assignedBasePlot = saved.assignedBasePlot,
+		displayedWeapons = {},
+	}
+	
+	-- Deserialize weapons
+	if saved.weapons then
+		for _, w in saved.weapons do
+			table.insert(data.weapons, { weaponId = w.weaponId, uid = w.uid })
+		end
+	end
+	
+	-- Deserialize arenasCompleted (convert string keys back to numbers)
+	if saved.arenasCompleted then
+		for arenaStr, completed in saved.arenasCompleted do
+			local arenaNum = tonumber(arenaStr)
+			if arenaNum then
+				data.arenasCompleted[arenaNum] = completed
+			end
+		end
+	end
+	
+	-- Deserialize displayed weapons
+	if saved.displayedWeapons then
+		for _, dw in saved.displayedWeapons do
+			table.insert(data.displayedWeapons, {
+				pedestalIndex = dw.pedestalIndex,
+				weaponUid = dw.weaponUid,
+				weaponId = dw.weaponId,
+			})
+		end
+	end
+	
+	return data
+end
+
+-- Create default data for new players
+local function createDefaultData(): PlayerDataState
+	return {
+		keys = Config.StartingKeys,
+		gems = Config.StartingGems,
+		xp = Config.StartingXP,
+		weapons = {
+			{ weaponId = STARTING_WEAPON_ID, uid = newUid() }, -- Starting weapon
+		},
+		crates = {},
+		upgrades = {},
+		arenasCompleted = {},
+		health = BASE_HEALTH,
+		maxHealth = BASE_HEALTH,
+		assignedBasePlot = nil, -- Will be assigned by BaseService
+		displayedWeapons = {},
+	}
+end
+
+-- Load player data from DataStore (or create new if not available)
+function PlayerData.load(player: Player): PlayerDataState
+	local userId = player.UserId
+	local key = "Player_" .. tostring(userId)
+	
+	-- If DataStore is available, try to load
+	if useDataStore and playerDataStore then
+		local success, result = pcall(function()
+			return playerDataStore:GetAsync(key)
+		end)
+		
+		if success and result then
+			print("[PlayerData] Loaded data for", player.Name)
+			local data = deserializeData(result)
+			dataByPlayer[player] = data
+			dataLoadedByPlayer[player] = true
+			return data
+		elseif not success then
+			warn("[PlayerData] Failed to load data for", player.Name, ":", result)
+		end
+	end
+	
+	-- Create new data (DataStore not available or no saved data)
+	print("[PlayerData] Creating new data for", player.Name)
+	local data = createDefaultData()
+	dataByPlayer[player] = data
+	dataLoadedByPlayer[player] = true
+	return data
+end
+
+-- Save player data to DataStore
+function PlayerData.save(player: Player): boolean
+	-- Skip if DataStore not available
+	if not useDataStore or not playerDataStore then
+		return false
+	end
+	
+	if not dataLoadedByPlayer[player] then
+		return false -- Don't save if data wasn't loaded
+	end
+	
+	local data = dataByPlayer[player]
+	if not data then return false end
+	
+	local userId = player.UserId
+	local key = "Player_" .. tostring(userId)
+	
+	local serialized = serializeData(data)
+	
+	local success, err = pcall(function()
+		playerDataStore:SetAsync(key, serialized)
+	end)
+	
+	if success then
+		print("[PlayerData] Saved data for", player.Name)
+	else
+		warn("[PlayerData] Failed to save data for", player.Name, ":", err)
+	end
+	
+	return success
+end
+
+-- Check if data is loaded
+function PlayerData.isLoaded(player: Player): boolean
+	return dataLoadedByPlayer[player] == true
+end
 
 local function getOrCreate(player: Player): PlayerDataState
 	if not dataByPlayer[player] then
-		-- DEBUG: Add ALL weapons to inventory for testing
-		local allWeapons = {}
-		for weaponId, _ in Config.Weapons do
-			table.insert(allWeapons, { weaponId = weaponId, uid = newUid() })
-		end
-		
-		dataByPlayer[player] = {
-			keys = Config.StartingKeys,
-			gems = Config.StartingGems,
-			xp = Config.StartingXP,
-			weapons = allWeapons, -- DEBUG: All weapons for testing
-			crates = {},
-			upgrades = {},
-			arenasCompleted = {},
-			health = BASE_HEALTH,
-			maxHealth = BASE_HEALTH,
-			-- Home Base
-			assignedBasePlot = nil,
-			displayedWeapons = {},
-		}
+		-- Data should be loaded via PlayerData.load() first
+		-- This is a fallback for edge cases
+		return PlayerData.load(player)
 	end
 	return dataByPlayer[player]
 end
 
 function PlayerData.get(player: Player): PlayerDataState
 	return getOrCreate(player)
+end
+
+-- Get weapons list
+function PlayerData.getWeapons(player: Player): { WeaponInstance }
+	return getOrCreate(player).weapons
 end
 
 -- Keys
@@ -184,7 +368,6 @@ function PlayerData.getWeaponCount(player: Player): number
 end
 
 function PlayerData.getMaxInventorySlots(player: Player): number
-	-- Fixed at 10 slots, no upgrades
 	return Config.BaseInventorySlots
 end
 
@@ -210,27 +393,25 @@ function PlayerData.canBuyUpgrade(player: Player, upgradeId: string): boolean
 	
 	local currentLevel = PlayerData.getUpgradeLevel(player, upgradeId)
 	
-	-- Check if at max level (nil means no max)
 	if upgradeDef.maxLevel and currentLevel >= upgradeDef.maxLevel then
 		return false
 	end
 	
-	-- Check if enough XP
 	return PlayerData.getXP(player) >= upgradeDef.xpCost
 end
 
--- Luck boost calculation (for crate opening)
+-- Luck boost calculation
 function PlayerData.getLuckMultiplier(player: Player): number
 	local d = getOrCreate(player)
 	local luckLevel = d.upgrades["luck_boost"] or 0
-	return 1 + (luckLevel * 0.05) -- 5% per level
+	return 1 + (luckLevel * 0.05)
 end
 
--- Key magnet calculation (for selling)
+-- Key magnet calculation
 function PlayerData.getKeyMagnetMultiplier(player: Player): number
 	local d = getOrCreate(player)
 	local magnetLevel = d.upgrades["key_magnet"] or 0
-	return 1 + (magnetLevel * 0.10) -- 10% per level
+	return 1 + (magnetLevel * 0.10)
 end
 
 -- Double roll token
@@ -246,22 +427,19 @@ function PlayerData.consumeDoubleRoll(player: Player): boolean
 	return true
 end
 
--- Create leaderstats folder for a player
+-- Create leaderstats folder
 function PlayerData.createLeaderstats(player: Player)
 	local d = getOrCreate(player)
 	
-	-- Create leaderstats folder
 	local leaderstats = Instance.new("Folder")
 	leaderstats.Name = "leaderstats"
 	leaderstats.Parent = player
 	
-	-- Keys stat
 	local keysStat = Instance.new("IntValue")
 	keysStat.Name = "Keys"
 	keysStat.Value = d.keys
 	keysStat.Parent = leaderstats
 	
-	-- XP stat
 	local xpStat = Instance.new("IntValue")
 	xpStat.Name = "XP"
 	xpStat.Value = d.xp
@@ -270,7 +448,7 @@ function PlayerData.createLeaderstats(player: Player)
 	return leaderstats
 end
 
--- Update leaderstats when data changes
+-- Update leaderstats
 function PlayerData.updateLeaderstats(player: Player)
 	local d = getOrCreate(player)
 	local leaderstats = player:FindFirstChild("leaderstats")
@@ -319,7 +497,6 @@ end
 function PlayerData.setMaxHealth(player: Player, amount: number): number
 	local d = getOrCreate(player)
 	d.maxHealth = math.max(1, amount)
-	-- If current health exceeds new max, clamp it
 	if d.health > d.maxHealth then
 		d.health = d.maxHealth
 	end
@@ -377,7 +554,7 @@ function PlayerData.displayWeaponOnPedestal(player: Player, weaponUid: string, p
 	-- Check if pedestal is already occupied
 	for _, dw in d.displayedWeapons do
 		if dw.pedestalIndex == pedestalIndex then
-			return false -- Pedestal already has a weapon
+			return false
 		end
 	end
 	
@@ -391,7 +568,7 @@ function PlayerData.displayWeaponOnPedestal(player: Player, weaponUid: string, p
 	end
 	
 	if not weaponData then
-		return false -- Weapon not found in inventory
+		return false
 	end
 	
 	-- Add to displayed weapons
@@ -408,13 +585,10 @@ end
 function PlayerData.retrieveWeaponFromPedestal(player: Player, pedestalIndex: number): boolean
 	local d = getOrCreate(player)
 	
-	-- Find displayed weapon on this pedestal
 	for i, dw in d.displayedWeapons do
 		if dw.pedestalIndex == pedestalIndex then
-			-- Remove from displayed
 			local removed = table.remove(d.displayedWeapons, i)
 			
-			-- Add back to inventory
 			table.insert(d.weapons, {
 				weaponId = removed.weaponId,
 				uid = removed.weaponUid,
@@ -424,7 +598,7 @@ function PlayerData.retrieveWeaponFromPedestal(player: Player, pedestalIndex: nu
 		end
 	end
 	
-	return false -- No weapon on this pedestal
+	return false
 end
 
 -- Get weapon displayed on a specific pedestal
@@ -455,9 +629,18 @@ function PlayerData.calculateBaseIncome(player: Player): number
 	return totalIncome
 end
 
--- Clean up when player leaves
-game:GetService("Players").PlayerRemoving:Connect(function(player: Player)
+-- Save on player leave
+Players.PlayerRemoving:Connect(function(player: Player)
+	PlayerData.save(player)
 	dataByPlayer[player] = nil
+	dataLoadedByPlayer[player] = nil
+end)
+
+-- Save all on server shutdown
+game:BindToClose(function()
+	for player, _ in dataByPlayer do
+		PlayerData.save(player)
+	end
 end)
 
 return PlayerData

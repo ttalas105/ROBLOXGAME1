@@ -1,9 +1,10 @@
 --[[
 	BaseService: Handles home base logic including:
-	- Auto-claim when player enters unclaimed base
+	- Auto-assign base on player join
 	- Weapon placement from equipped weapon
 	- Passive income accumulation per pedestal
 	- Key collection from pedestals
+	- Data persistence (restore weapons on rejoin)
 ]]
 
 local Players = game:GetService("Players")
@@ -19,8 +20,9 @@ local WeaponService = require(script.Parent:WaitForChild("WeaponService"))
 
 local BaseService = {}
 
--- Track which plots are claimed by which player
+-- Track which plots are claimed by which player (userId -> plotNumber for quick lookup)
 local plotOwners: { [number]: number } = {} -- plotNumber -> userId
+local playerPlots: { [number]: number } = {} -- userId -> plotNumber
 
 -- Track accumulated keys per pedestal (plotNumber -> pedestalIndex -> keys)
 local accumulatedKeys: { [number]: { [number]: number } } = {}
@@ -32,9 +34,6 @@ function BaseService.init()
 	
 	-- Set up remote handlers
 	BaseService.setupRemotes()
-	
-	-- Connect auto-claim zones
-	BaseService.connectAutoClaimZones()
 	
 	-- Connect pedestal prompts
 	BaseService.connectPedestalPrompts()
@@ -53,63 +52,53 @@ function BaseService.setupRemotes()
 	end
 end
 
--- Connect auto-claim zones for all plots
-function BaseService.connectAutoClaimZones()
-	local basesFolder = Workspace:FindFirstChild("HomeBases")
-	if not basesFolder then return end
+-- Called when player data is loaded - assigns base and restores weapons
+function BaseService.onPlayerDataLoaded(player: Player)
+	-- Check if player already has a base assigned (from saved data)
+	local savedPlot = PlayerData.getAssignedBasePlot(player)
 	
-	local plotsFolder = basesFolder:FindFirstChild("Plots")
-	if not plotsFolder then return end
-	
-	for _, plot in plotsFolder:GetChildren() do
-		local plotNumber = plot:GetAttribute("PlotNumber")
-		local claimZone = plot:FindFirstChild("ClaimZone")
-		if not claimZone then continue end
-		
-		claimZone.Touched:Connect(function(otherPart: BasePart)
-			local character = otherPart.Parent
-			if not character or not character:IsA("Model") then return end
+	if savedPlot and savedPlot >= 1 and savedPlot <= Config.TotalBasePlots then
+		-- Player has a saved base - check if it's available
+		if not plotOwners[savedPlot] then
+			-- Claim their saved plot
+			BaseService.claimPlotInternal(player, savedPlot)
 			
-			local humanoid = character:FindFirstChild("Humanoid")
-			if not humanoid then return end
-			
-			local player = Players:GetPlayerFromCharacter(character)
-			if not player then return end
-			
-			-- Check if plot is unclaimed
-			if plotOwners[plotNumber] then return end
-			
-			-- Check if player already has a plot
-			local currentPlot = PlayerData.getAssignedBasePlot(player)
-			if currentPlot then return end
-			
-			-- Auto-claim the plot
-			BaseService.claimPlot(player, plotNumber)
-		end)
+			-- Restore displayed weapons
+			BaseService.restoreDisplayedWeapons(player, savedPlot)
+		else
+			-- Their old plot is taken, assign a new one
+			local newPlot = BaseService.findAvailablePlot()
+			if newPlot then
+				PlayerData.assignBasePlot(player, newPlot)
+				BaseService.claimPlotInternal(player, newPlot)
+				-- Note: displayed weapons data is lost since plot changed
+			end
+		end
+	else
+		-- New player - assign an available plot
+		local newPlot = BaseService.findAvailablePlot()
+		if newPlot then
+			PlayerData.assignBasePlot(player, newPlot)
+			BaseService.claimPlotInternal(player, newPlot)
+		end
 	end
 end
 
--- Claim a plot for a player
-function BaseService.claimPlot(player: Player, plotNumber: number): boolean
-	-- Validate plot number
-	if plotNumber < 1 or plotNumber > Config.TotalBasePlots then
-		return false
+-- Find an available (unclaimed) plot
+function BaseService.findAvailablePlot(): number?
+	for i = 1, Config.TotalBasePlots do
+		if not plotOwners[i] then
+			return i
+		end
 	end
-	
-	-- Check if player already has a plot
-	local currentPlot = PlayerData.getAssignedBasePlot(player)
-	if currentPlot then
-		return false
-	end
-	
-	-- Check if plot is already claimed
-	if plotOwners[plotNumber] then
-		return false
-	end
-	
-	-- Claim the plot
+	return nil -- All plots taken
+end
+
+-- Internal claim function (no validation, just claims)
+function BaseService.claimPlotInternal(player: Player, plotNumber: number)
+	-- Register ownership
 	plotOwners[plotNumber] = player.UserId
-	PlayerData.assignBasePlot(player, plotNumber)
+	playerPlots[player.UserId] = plotNumber
 	
 	-- Initialize accumulated keys for this plot
 	accumulatedKeys[plotNumber] = {}
@@ -120,14 +109,38 @@ function BaseService.claimPlot(player: Player, plotNumber: number): boolean
 	-- Update the visual sign
 	BaseBuilder.updateOwnerSign(plotNumber, player.DisplayName)
 	
-	-- Notify all clients
-	Remotes.BaseClaimed:FireAllClients(plotNumber, player.UserId, player.DisplayName)
+	print("[BaseService]", player.Name, "assigned to plot", plotNumber)
+end
+
+-- Restore displayed weapons from saved data
+function BaseService.restoreDisplayedWeapons(player: Player, plotNumber: number)
+	local displayedWeapons = PlayerData.getDisplayedWeapons(player)
 	
-	-- Update player data
-	Remotes.PlayerDataUpdated:FireClient(player, PlayerData.get(player))
+	for _, dw in displayedWeapons do
+		local pedestalIndex = dw.pedestalIndex
+		local weaponId = dw.weaponId
+		
+		local weaponDef = Config.Weapons[weaponId]
+		if not weaponDef then continue end
+		
+		local rarity = weaponDef.rarity or "Common"
+		local incomeRate = Config.BaseIncomePerRarity[rarity] or 1
+		
+		-- Update pedestal visuals
+		BaseBuilder.updatePedestalVisuals(plotNumber, pedestalIndex, weaponId, rarity, incomeRate)
+		
+		-- Spawn weapon model
+		BaseService.spawnWeaponOnPedestal(plotNumber, pedestalIndex, weaponId)
+		
+		-- Set pedestal attributes
+		local pedestal = BaseBuilder.getPedestal(plotNumber, pedestalIndex)
+		if pedestal then
+			pedestal:SetAttribute("WeaponUid", dw.weaponUid)
+			pedestal:SetAttribute("WeaponId", weaponId)
+		end
+	end
 	
-	print("[BaseService]", player.Name, "auto-claimed plot", plotNumber)
-	return true
+	print("[BaseService] Restored", #displayedWeapons, "weapons for", player.Name)
 end
 
 -- Connect pedestal prompts (place weapon and collect)
@@ -158,7 +171,6 @@ function BaseService.connectPedestalPrompts()
 						local hasEquipped = WeaponService.getEquippedWeapon(player) ~= nil
 						local hasWeapon = pedestal:GetAttribute("HasWeapon")
 						
-						-- Hide if not owner, no weapon equipped, or slot already has weapon
 						if playerPlot ~= plotNumber or not hasEquipped or hasWeapon then
 							placePrompt.Enabled = false
 							task.delay(0.1, function()
@@ -413,7 +425,6 @@ function BaseService.spawnWeaponOnPedestal(plotNumber: number, pedestalIndex: nu
 	if weaponDef then
 		local glow = Instance.new("PointLight")
 		glow.Name = "RarityGlow"
-		glow.Color = BaseBuilder.RARITY_COLORS and BaseBuilder.RARITY_COLORS[weaponDef.rarity] or Color3.new(1, 1, 1)
 		glow.Brightness = 2
 		glow.Range = 10
 		
@@ -501,21 +512,21 @@ end
 
 -- Clean up when player leaves
 Players.PlayerRemoving:Connect(function(player: Player)
-	-- Note: In a real game with persistence, you'd keep the plot claimed
-	-- For now, we release the plot when player leaves
-	local plotNumber = PlayerData.getAssignedBasePlot(player)
+	local plotNumber = playerPlots[player.UserId]
 	if plotNumber then
+		-- Clear ownership tracking
 		plotOwners[plotNumber] = nil
+		playerPlots[player.UserId] = nil
 		accumulatedKeys[plotNumber] = nil
 		
-		-- Clear displayed weapons visually
+		-- Clear displayed weapons visually (weapons are saved in PlayerData)
 		for i = 1, Config.PedestalsPerBase do
 			BaseBuilder.updatePedestalVisuals(plotNumber, i, nil, nil, nil)
 			BaseService.removeWeaponFromPedestal(plotNumber, i)
 		end
 		
-		-- Reset sign
-		BaseBuilder.updateOwnerSign(plotNumber, nil)
+		-- Reset sign to show player's name still (they own it, just offline)
+		BaseBuilder.updateOwnerSign(plotNumber, player.DisplayName .. " (Offline)")
 	end
 end)
 

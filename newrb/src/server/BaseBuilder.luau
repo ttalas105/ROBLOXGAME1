@@ -159,7 +159,8 @@ local function createPedestal(index: number, position: Vector3, parent: Instance
 end
 
 -- Create a single base plot
-local function createBasePlot(plotNumber: number, position: Vector3, parent: Instance): Model
+-- side: -1 = left of walkway, 1 = right of walkway (determines entrance direction)
+local function createBasePlot(plotNumber: number, position: Vector3, side: number, parent: Instance): Model
 	local plot = Instance.new("Model")
 	plot.Name = "BasePlot_" .. plotNumber
 	
@@ -173,68 +174,86 @@ local function createBasePlot(plotNumber: number, position: Vector3, parent: Ins
 	-- Floor
 	local floor = createPart("Floor", plotSize, basePos, COLORS.plotFloor, Enum.Material.Concrete, plot)
 	
-	-- Border walls (low, decorative)
-	local borderHeight = 1.5
-	local borderThickness = 1
+	-- Glass enclosure walls (tall, transparent)
+	local glassHeight = 10
+	local glassThickness = 0.5
+	local glassColor = Color3.fromRGB(200, 220, 255)
+	local glassTransparency = 0.7
 	
-	-- Front border (with gap for entrance)
-	local gapWidth = 12
-	local frontSegmentWidth = (plotSize.X - gapWidth) / 2
-	local frontLeft = createPart("BorderFrontLeft", Vector3.new(frontSegmentWidth, borderHeight, borderThickness), 
-		basePos + Vector3.new(-(gapWidth/2 + frontSegmentWidth/2), borderHeight/2 + 0.5, plotSize.Z/2), COLORS.plotBorder, Enum.Material.Concrete, plot)
-	local frontRight = createPart("BorderFrontRight", Vector3.new(frontSegmentWidth, borderHeight, borderThickness), 
-		basePos + Vector3.new((gapWidth/2 + frontSegmentWidth/2), borderHeight/2 + 0.5, plotSize.Z/2), COLORS.plotBorder, Enum.Material.Concrete, plot)
+	-- Entrance faces the walkway (towards X=0)
+	-- Left side bases (side=-1) have entrance on +X side
+	-- Right side bases (side=1) have entrance on -X side
+	local entranceSide = -side -- Entrance faces opposite of plot's side
+	local gapWidth = 14
 	
-	-- Back border
-	local back = createPart("BorderBack", Vector3.new(plotSize.X, borderHeight, borderThickness), 
-		basePos + Vector3.new(0, borderHeight/2 + 0.5, -plotSize.Z/2), COLORS.plotBorder, Enum.Material.Concrete, plot)
+	-- Front glass (Z+ side) - solid wall
+	local glassFront = createPart("GlassFront", Vector3.new(plotSize.X, glassHeight, glassThickness), 
+		basePos + Vector3.new(0, glassHeight/2 + 0.5, plotSize.Z/2), glassColor, Enum.Material.Glass, plot)
+	glassFront.Transparency = glassTransparency
 	
-	-- Side borders
-	local left = createPart("BorderLeft", Vector3.new(borderThickness, borderHeight, plotSize.Z), 
-		basePos + Vector3.new(-plotSize.X/2, borderHeight/2 + 0.5, 0), COLORS.plotBorder, Enum.Material.Concrete, plot)
-	local right = createPart("BorderRight", Vector3.new(borderThickness, borderHeight, plotSize.Z), 
-		basePos + Vector3.new(plotSize.X/2, borderHeight/2 + 0.5, 0), COLORS.plotBorder, Enum.Material.Concrete, plot)
+	-- Back glass (Z- side) - solid wall
+	local glassBack = createPart("GlassBack", Vector3.new(plotSize.X, glassHeight, glassThickness), 
+		basePos + Vector3.new(0, glassHeight/2 + 0.5, -plotSize.Z/2), glassColor, Enum.Material.Glass, plot)
+	glassBack.Transparency = glassTransparency
 	
-	-- Billboard sign above base (like arena doors)
-	local signPost = createPart("SignPost", Vector3.new(2, 12, 2),
-		basePos + Vector3.new(0, 6, -plotSize.Z/2 + 2), COLORS.plotBorder, Enum.Material.Concrete, plot)
+	-- Side glass walls - one solid, one with entrance gap
+	local sideSegmentLength = (plotSize.Z - gapWidth) / 2
 	
+	if entranceSide == 1 then
+		-- Entrance on +X side (right)
+		-- Left side (-X) is solid
+		local glassLeft = createPart("GlassLeft", Vector3.new(glassThickness, glassHeight, plotSize.Z), 
+			basePos + Vector3.new(-plotSize.X/2, glassHeight/2 + 0.5, 0), glassColor, Enum.Material.Glass, plot)
+		glassLeft.Transparency = glassTransparency
+		-- Right side (+X) has gap
+		local glassRF = createPart("GlassRightFront", Vector3.new(glassThickness, glassHeight, sideSegmentLength), 
+			basePos + Vector3.new(plotSize.X/2, glassHeight/2 + 0.5, plotSize.Z/2 - sideSegmentLength/2), glassColor, Enum.Material.Glass, plot)
+		glassRF.Transparency = glassTransparency
+		local glassRB = createPart("GlassRightBack", Vector3.new(glassThickness, glassHeight, sideSegmentLength), 
+			basePos + Vector3.new(plotSize.X/2, glassHeight/2 + 0.5, -plotSize.Z/2 + sideSegmentLength/2), glassColor, Enum.Material.Glass, plot)
+		glassRB.Transparency = glassTransparency
+	else
+		-- Entrance on -X side (left)
+		-- Right side (+X) is solid
+		local glassRight = createPart("GlassRight", Vector3.new(glassThickness, glassHeight, plotSize.Z), 
+			basePos + Vector3.new(plotSize.X/2, glassHeight/2 + 0.5, 0), glassColor, Enum.Material.Glass, plot)
+		glassRight.Transparency = glassTransparency
+		-- Left side (-X) has gap
+		local glassLF = createPart("GlassLeftFront", Vector3.new(glassThickness, glassHeight, sideSegmentLength), 
+			basePos + Vector3.new(-plotSize.X/2, glassHeight/2 + 0.5, plotSize.Z/2 - sideSegmentLength/2), glassColor, Enum.Material.Glass, plot)
+		glassLF.Transparency = glassTransparency
+		local glassLB = createPart("GlassLeftBack", Vector3.new(glassThickness, glassHeight, sideSegmentLength), 
+			basePos + Vector3.new(-plotSize.X/2, glassHeight/2 + 0.5, -plotSize.Z/2 + sideSegmentLength/2), glassColor, Enum.Material.Glass, plot)
+		glassLB.Transparency = glassTransparency
+	end
+	
+	-- Corner pillars (decorative, solid)
+	local pillarSize = Vector3.new(1.5, glassHeight + 2, 1.5)
+	local pillarColor = COLORS.plotBorder
+	createPart("PillarFL", pillarSize, basePos + Vector3.new(-plotSize.X/2, glassHeight/2 + 1, plotSize.Z/2), pillarColor, Enum.Material.Concrete, plot)
+	createPart("PillarFR", pillarSize, basePos + Vector3.new(plotSize.X/2, glassHeight/2 + 1, plotSize.Z/2), pillarColor, Enum.Material.Concrete, plot)
+	createPart("PillarBL", pillarSize, basePos + Vector3.new(-plotSize.X/2, glassHeight/2 + 1, -plotSize.Z/2), pillarColor, Enum.Material.Concrete, plot)
+	createPart("PillarBR", pillarSize, basePos + Vector3.new(plotSize.X/2, glassHeight/2 + 1, -plotSize.Z/2), pillarColor, Enum.Material.Concrete, plot)
+	
+	-- Billboard sign high above base center (no stick)
 	local billboard = Instance.new("BillboardGui")
 	billboard.Name = "OwnerBillboard"
-	billboard.Size = UDim2.new(0, 200, 0, 60)
-	billboard.StudsOffset = Vector3.new(0, 8, 0)
+	billboard.Size = UDim2.new(0, 250, 0, 80)
+	billboard.StudsOffset = Vector3.new(0, 20, 0) -- High above
 	billboard.AlwaysOnTop = true
-	billboard.Parent = signPost
+	billboard.Parent = floor
 	
 	local ownerLabel = Instance.new("TextLabel")
 	ownerLabel.Name = "OwnerLabel"
-	ownerLabel.Size = UDim2.new(1, 0, 0.6, 0)
+	ownerLabel.Size = UDim2.new(1, 0, 1, 0)
 	ownerLabel.BackgroundTransparency = 1
-	ownerLabel.Text = "[Unclaimed]"
-	ownerLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+	ownerLabel.Text = "" -- Will be set when player is assigned
+	ownerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	ownerLabel.TextSize = 24
 	ownerLabel.Font = Enum.Font.GothamBlack
 	ownerLabel.TextStrokeTransparency = 0
 	ownerLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
 	ownerLabel.Parent = billboard
-	
-	local subtitleLabel = Instance.new("TextLabel")
-	subtitleLabel.Name = "SubtitleLabel"
-	subtitleLabel.Size = UDim2.new(1, 0, 0.4, 0)
-	subtitleLabel.Position = UDim2.new(0, 0, 0.6, 0)
-	subtitleLabel.BackgroundTransparency = 1
-	subtitleLabel.Text = "Walk in to claim"
-	subtitleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-	subtitleLabel.TextSize = 14
-	subtitleLabel.Font = Enum.Font.GothamBold
-	subtitleLabel.TextStrokeTransparency = 0.5
-	subtitleLabel.Parent = billboard
-	
-	-- Auto-claim trigger zone (invisible, detects player entry)
-	local claimZone = createPart("ClaimZone", Vector3.new(plotSize.X - 4, 10, plotSize.Z - 4),
-		basePos + Vector3.new(0, 5, 0), Color3.new(1, 1, 1), Enum.Material.SmoothPlastic, plot)
-	claimZone.Transparency = 1
-	claimZone.CanCollide = false
 	
 	-- Create pedestals in a spread-out pattern (2 rows of 3)
 	local pedestalsFolder = Instance.new("Folder")
@@ -300,6 +319,33 @@ local function createWalkway(parent: Instance)
 		startPos + (direction * totalLength/2) + Vector3.new(0, 0.35, 0), COLORS.walkwayStripe, Enum.Material.Neon, walkway)
 	stripe.CanCollide = false
 	
+	-- Boundary walls around the entire bases area (prevent falling off)
+	local wallHeight = 15
+	local wallThickness = 3
+	local wallColor = Color3.fromRGB(60, 60, 70)
+	local groundCenter = Vector3.new(0, 0, hubFloorEdge + groundLength/2)
+	
+	-- Left boundary wall
+	local leftWall = createPart("BoundaryLeft", Vector3.new(wallThickness, wallHeight, groundLength),
+		groundCenter + Vector3.new(-groundWidth/2, wallHeight/2, 0), wallColor, Enum.Material.Brick, walkway)
+	
+	-- Right boundary wall
+	local rightWall = createPart("BoundaryRight", Vector3.new(wallThickness, wallHeight, groundLength),
+		groundCenter + Vector3.new(groundWidth/2, wallHeight/2, 0), wallColor, Enum.Material.Brick, walkway)
+	
+	-- Back boundary wall (end of bases area)
+	local backWall = createPart("BoundaryBack", Vector3.new(groundWidth, wallHeight, wallThickness),
+		groundCenter + Vector3.new(0, wallHeight/2, groundLength/2), wallColor, Enum.Material.Brick, walkway)
+	
+	-- Wall top trim (decorative)
+	local trimColor = Color3.fromRGB(80, 80, 90)
+	createPart("TrimLeft", Vector3.new(wallThickness + 1, 2, groundLength), 
+		groundCenter + Vector3.new(-groundWidth/2, wallHeight + 1, 0), trimColor, Enum.Material.Slate, walkway)
+	createPart("TrimRight", Vector3.new(wallThickness + 1, 2, groundLength), 
+		groundCenter + Vector3.new(groundWidth/2, wallHeight + 1, 0), trimColor, Enum.Material.Slate, walkway)
+	createPart("TrimBack", Vector3.new(groundWidth + 2, 2, wallThickness + 1), 
+		groundCenter + Vector3.new(0, wallHeight + 1, groundLength/2), trimColor, Enum.Material.Slate, walkway)
+	
 	walkway.Parent = parent
 	return walkway
 end
@@ -332,7 +378,7 @@ function BaseBuilder.build(): Folder
 		
 		local plotPos = startPos + (direction * distanceAlongWalkway) + Vector3.new(side * (plotSize.X/2 + 12), 0, 0)
 		
-		createBasePlot(i, plotPos, plotsFolder)
+		createBasePlot(i, plotPos, side, plotsFolder)
 	end
 	
 	print("[BaseBuilder] Built", Config.TotalBasePlots, "home base plots")
@@ -355,10 +401,10 @@ function BaseBuilder.updateOwnerSign(plotNumber: number, ownerName: string?)
 	local plot = BaseBuilder.getPlot(plotNumber)
 	if not plot then return end
 	
-	local signPost = plot:FindFirstChild("SignPost")
-	if not signPost then return end
+	local floor = plot:FindFirstChild("Floor")
+	if not floor then return end
 	
-	local billboard = signPost:FindFirstChild("OwnerBillboard")
+	local billboard = floor:FindFirstChild("OwnerBillboard")
 	if not billboard then return end
 	
 	local ownerLabel = billboard:FindFirstChild("OwnerLabel")

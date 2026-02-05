@@ -150,23 +150,29 @@ if arena1 then
 end
 
 -- Setup players when they join
-Players.PlayerAdded:Connect(function(player)
-	print("[Server] Player joined:", player.Name)
+local function setupPlayer(player: Player)
+	print("[Server] Setting up player:", player.Name)
 	
-	-- Create player data with starting keys/xp
-	local data = PlayerData.get(player)
+	-- Load player data from DataStore (waits for load)
+	local data = PlayerData.load(player)
 	
 	-- Create leaderstats (shows Keys and XP on leaderboard)
 	PlayerData.createLeaderstats(player)
 	
+	-- Assign home base (auto-assigns or restores saved base)
+	BaseService.onPlayerDataLoaded(player)
+	
 	print("[Server]", player.Name, "has", data.keys, "keys and", data.xp, "XP")
-end)
+end
+
+Players.PlayerAdded:Connect(setupPlayer)
 
 -- Handle players already in game (in case script loads late)
 for _, player in Players:GetPlayers() do
 	task.spawn(function()
-		local data = PlayerData.get(player)
-		if not player:FindFirstChild("leaderstats") then
+		if not PlayerData.isLoaded(player) then
+			setupPlayer(player)
+		elseif not player:FindFirstChild("leaderstats") then
 			PlayerData.createLeaderstats(player)
 		end
 	end)

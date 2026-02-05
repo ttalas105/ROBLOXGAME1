@@ -149,9 +149,15 @@ local function createWalls()
 	local wallDistance = 90
 	
 	-- Wall positions (surrounding the area)
+	-- South wall is split to create opening for Home Bases entrance
+	local gapWidth = 20 -- Width of opening for home bases
+	local southWallSegmentLength = (wallLength - gapWidth) / 2
+	
 	local wallConfigs = {
 		{pos = Vector3.new(0, wallHeight/2, -wallDistance), size = Vector3.new(wallLength, wallHeight, wallThickness), name = "NorthWall"},
-		{pos = Vector3.new(0, wallHeight/2, wallDistance), size = Vector3.new(wallLength, wallHeight, wallThickness), name = "SouthWall"},
+		-- South wall split into two segments with gap in center
+		{pos = Vector3.new(-(gapWidth/2 + southWallSegmentLength/2), wallHeight/2, wallDistance), size = Vector3.new(southWallSegmentLength, wallHeight, wallThickness), name = "SouthWallLeft"},
+		{pos = Vector3.new((gapWidth/2 + southWallSegmentLength/2), wallHeight/2, wallDistance), size = Vector3.new(southWallSegmentLength, wallHeight, wallThickness), name = "SouthWallRight"},
 		{pos = Vector3.new(-wallDistance, wallHeight/2, 0), size = Vector3.new(wallThickness, wallHeight, wallLength), name = "WestWall"},
 		{pos = Vector3.new(wallDistance, wallHeight/2, 0), size = Vector3.new(wallThickness, wallHeight, wallLength), name = "EastWall"},
 	}
@@ -176,6 +182,71 @@ local function createWalls()
 		trim.Material = Enum.Material.Slate
 		trim.Parent = walls
 	end
+	
+	-- Home Bases gate frame (at the south wall opening)
+	local gateHeight = 20
+	local pillarSize = Vector3.new(4, gateHeight, 4)
+	
+	-- Left pillar
+	local leftPillar = Instance.new("Part")
+	leftPillar.Name = "HomeBasesGate_Left"
+	leftPillar.Size = pillarSize
+	leftPillar.Position = Vector3.new(-gapWidth/2 - 2, gateHeight/2, wallDistance)
+	leftPillar.Anchored = true
+	leftPillar.Color = COLORS.darkStone
+	leftPillar.Material = Enum.Material.Brick
+	leftPillar.Parent = walls
+	
+	-- Right pillar
+	local rightPillar = Instance.new("Part")
+	rightPillar.Name = "HomeBasesGate_Right"
+	rightPillar.Size = pillarSize
+	rightPillar.Position = Vector3.new(gapWidth/2 + 2, gateHeight/2, wallDistance)
+	rightPillar.Anchored = true
+	rightPillar.Color = COLORS.darkStone
+	rightPillar.Material = Enum.Material.Brick
+	rightPillar.Parent = walls
+	
+	-- Top arch beam
+	local topBeam = Instance.new("Part")
+	topBeam.Name = "HomeBasesGate_Top"
+	topBeam.Size = Vector3.new(gapWidth + 8, 4, 4)
+	topBeam.Position = Vector3.new(0, gateHeight + 2, wallDistance)
+	topBeam.Anchored = true
+	topBeam.Color = COLORS.stone
+	topBeam.Material = Enum.Material.Slate
+	topBeam.Parent = walls
+	
+	-- Billboard sign above gate (like arena doors)
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "BasesSign"
+	billboard.Size = UDim2.new(0, 250, 0, 80)
+	billboard.StudsOffset = Vector3.new(0, 15, 0)
+	billboard.AlwaysOnTop = true
+	billboard.Parent = topBeam
+	
+	local basesLabel = Instance.new("TextLabel")
+	basesLabel.Size = UDim2.new(1, 0, 0.7, 0)
+	basesLabel.BackgroundTransparency = 1
+	basesLabel.Text = "BASES"
+	basesLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
+	basesLabel.TextSize = 36
+	basesLabel.Font = Enum.Font.GothamBlack
+	basesLabel.TextStrokeTransparency = 0
+	basesLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+	basesLabel.Parent = billboard
+	
+	local statusLabel = Instance.new("TextLabel")
+	statusLabel.Name = "Status"
+	statusLabel.Size = UDim2.new(1, 0, 0.3, 0)
+	statusLabel.Position = UDim2.new(0, 0, 0.7, 0)
+	statusLabel.BackgroundTransparency = 1
+	statusLabel.Text = "DISPLAY WEAPONS FOR INCOME"
+	statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+	statusLabel.TextSize = 16
+	statusLabel.Font = Enum.Font.GothamBold
+	statusLabel.TextStrokeTransparency = 0.5
+	statusLabel.Parent = billboard
 	
 	-- Corner towers
 	local towerPositions = {

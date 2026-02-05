@@ -7,6 +7,9 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 
 export type WeaponInstance = { weaponId: string, uid: string }
 
+-- Displayed weapon on a pedestal: tracks which weapon uid is on which pedestal slot
+export type DisplayedWeapon = { pedestalIndex: number, weaponUid: string, weaponId: string }
+
 export type PlayerDataState = {
 	keys: number,
 	gems: number,
@@ -17,6 +20,9 @@ export type PlayerDataState = {
 	arenasCompleted: { [number]: boolean }, -- arenaNumber -> completed
 	health: number, -- current health
 	maxHealth: number, -- max health (base 100, can be increased)
+	-- Home Base
+	assignedBasePlot: number?, -- which plot (1-7) this player owns, nil if none
+	displayedWeapons: { DisplayedWeapon }, -- weapons on pedestals
 }
 
 local PlayerData = {}
@@ -51,6 +57,9 @@ local function getOrCreate(player: Player): PlayerDataState
 			arenasCompleted = {},
 			health = BASE_HEALTH,
 			maxHealth = BASE_HEALTH,
+			-- Home Base
+			assignedBasePlot = nil,
+			displayedWeapons = {},
 		}
 	end
 	return dataByPlayer[player]
@@ -341,6 +350,109 @@ end
 function PlayerData.getArenasCompleted(player: Player): { [number]: boolean }
 	local d = getOrCreate(player)
 	return d.arenasCompleted
+end
+
+-- ========== HOME BASE FUNCTIONS ==========
+
+-- Get assigned base plot (nil if none)
+function PlayerData.getAssignedBasePlot(player: Player): number?
+	return getOrCreate(player).assignedBasePlot
+end
+
+-- Assign a base plot to a player
+function PlayerData.assignBasePlot(player: Player, plotNumber: number)
+	local d = getOrCreate(player)
+	d.assignedBasePlot = plotNumber
+end
+
+-- Get displayed weapons on base
+function PlayerData.getDisplayedWeapons(player: Player): { DisplayedWeapon }
+	return getOrCreate(player).displayedWeapons
+end
+
+-- Display a weapon on a pedestal (removes from inventory)
+function PlayerData.displayWeaponOnPedestal(player: Player, weaponUid: string, pedestalIndex: number): boolean
+	local d = getOrCreate(player)
+	
+	-- Check if pedestal is already occupied
+	for _, dw in d.displayedWeapons do
+		if dw.pedestalIndex == pedestalIndex then
+			return false -- Pedestal already has a weapon
+		end
+	end
+	
+	-- Find and remove weapon from inventory
+	local weaponData = nil
+	for i, w in d.weapons do
+		if w.uid == weaponUid then
+			weaponData = table.remove(d.weapons, i)
+			break
+		end
+	end
+	
+	if not weaponData then
+		return false -- Weapon not found in inventory
+	end
+	
+	-- Add to displayed weapons
+	table.insert(d.displayedWeapons, {
+		pedestalIndex = pedestalIndex,
+		weaponUid = weaponUid,
+		weaponId = weaponData.weaponId,
+	})
+	
+	return true
+end
+
+-- Retrieve a weapon from a pedestal (adds back to inventory)
+function PlayerData.retrieveWeaponFromPedestal(player: Player, pedestalIndex: number): boolean
+	local d = getOrCreate(player)
+	
+	-- Find displayed weapon on this pedestal
+	for i, dw in d.displayedWeapons do
+		if dw.pedestalIndex == pedestalIndex then
+			-- Remove from displayed
+			local removed = table.remove(d.displayedWeapons, i)
+			
+			-- Add back to inventory
+			table.insert(d.weapons, {
+				weaponId = removed.weaponId,
+				uid = removed.weaponUid,
+			})
+			
+			return true
+		end
+	end
+	
+	return false -- No weapon on this pedestal
+end
+
+-- Get weapon displayed on a specific pedestal
+function PlayerData.getWeaponOnPedestal(player: Player, pedestalIndex: number): DisplayedWeapon?
+	local d = getOrCreate(player)
+	for _, dw in d.displayedWeapons do
+		if dw.pedestalIndex == pedestalIndex then
+			return dw
+		end
+	end
+	return nil
+end
+
+-- Calculate total passive income per second from all displayed weapons
+function PlayerData.calculateBaseIncome(player: Player): number
+	local d = getOrCreate(player)
+	local totalIncome = 0
+	
+	for _, dw in d.displayedWeapons do
+		local weaponDef = Config.Weapons[dw.weaponId]
+		if weaponDef then
+			local rarity = weaponDef.rarity
+			local incomeRate = Config.BaseIncomePerRarity[rarity] or 0
+			totalIncome += incomeRate
+		end
+	end
+	
+	return totalIncome
 end
 
 -- Clean up when player leaves

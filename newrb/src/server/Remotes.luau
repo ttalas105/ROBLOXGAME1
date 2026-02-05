@@ -79,6 +79,16 @@ function Remotes.createAll()
 	Remotes.Attack = Remotes.createRemoteEvent("Attack") -- Client -> Server attack request
 	Remotes.AttackHit = Remotes.createRemoteEvent("AttackHit") -- Server -> All clients for hit effects
 	
+	-- Home Base system
+	Remotes.ClaimBase = Remotes.createRemoteEvent("ClaimBase") -- Client -> Server: claim a plot
+	Remotes.BaseClaimed = Remotes.createRemoteEvent("BaseClaimed") -- Server -> All: plot claimed
+	Remotes.DisplayWeapon = Remotes.createRemoteEvent("DisplayWeapon") -- Client -> Server: put weapon on pedestal
+	Remotes.RetrieveWeapon = Remotes.createRemoteEvent("RetrieveWeapon") -- Client -> Server: take weapon from pedestal
+	Remotes.WeaponDisplayed = Remotes.createRemoteEvent("WeaponDisplayed") -- Server -> All: weapon placed/removed
+	Remotes.BaseIncomeEarned = Remotes.createRemoteEvent("BaseIncomeEarned") -- Server -> Client: income notification
+	Remotes.OpenWeaponSelector = Remotes.createRemoteEvent("OpenWeaponSelector") -- Server -> Client: open UI to select weapon
+	Remotes.GetBaseData = Remotes.createRemoteFunction("GetBaseData") -- Client -> Server: get base info
+	
 	return Remotes
 end
 

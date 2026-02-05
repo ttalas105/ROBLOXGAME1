@@ -97,6 +97,12 @@ if not WeaponController then
 	warn("[Client] WeaponController not found - combat disabled")
 end
 
+-- Base system (home bases, weapon display)
+local BaseClient = safeRequire("BaseClient")
+if not BaseClient then
+	warn("[Client] BaseClient not found - base display disabled")
+end
+
 print("[Client] All modules loaded, building UIs...")
 
 -- Build all shop UIs (hidden by default)
@@ -117,6 +123,11 @@ InventoryBar.setCrateOpener(CrateOpener)
 -- Initialize weapon controller (equip, attack, combat)
 if WeaponController then
 	WeaponController.init()
+end
+
+-- Initialize base client (home bases, weapon selector UI)
+if BaseClient then
+	BaseClient.build()
 end
 
 -- Inventory bar click callback disabled - use Sell Shop to sell weapons
@@ -156,6 +167,10 @@ local function refreshAllShops(state: any)
 	-- Update weapon controller inventory (for 1-9 key equipping)
 	if WeaponController and state.weapons then
 		WeaponController.updateInventory(state.weapons)
+	end
+	-- Update base client state
+	if BaseClient then
+		BaseClient.updateState(state)
 	end
 end
 

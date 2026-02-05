@@ -14,14 +14,14 @@ local ARENA_ORIGIN = Vector3.new(2000, 0, 0)
 local ARENA_SIZE_X = 420
 local ARENA_SIZE_Z = 420
 
--- Hub lighting (evening) - stored so we can restore
+-- Hub lighting (bright day) - stored so we can restore
 local HUB_LIGHTING = {
-	ClockTime = 20.5,
-	Brightness = 1.5,
-	Ambient = Color3.fromRGB(70, 60, 90),
-	OutdoorAmbient = Color3.fromRGB(80, 70, 100),
-	FogStart = 100,
-	FogEnd = 600,
+	ClockTime = 14,
+	Brightness = 2,
+	Ambient = Color3.fromRGB(150, 150, 160),
+	OutdoorAmbient = Color3.fromRGB(170, 170, 180),
+	FogStart = 500,
+	FogEnd = 2000,
 }
 
 local DAYLIGHT_LIGHTING = {

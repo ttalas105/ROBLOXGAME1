@@ -60,6 +60,9 @@ if not WeaponService then return end
 local ZombieAI = safeRequire("ZombieAI")
 if not ZombieAI then return end
 
+local BaseService = safeRequire("BaseService")
+if not BaseService then return end
+
 -- Start the shop service (creates remotes and connects handlers)
 ShopService.start()
 print("[Server] ShopService started")
@@ -71,6 +74,10 @@ print("[Server] WeaponService started")
 -- Start the zombie AI (spawns zombies in Arena 1)
 ZombieAI.init()
 print("[Server] ZombieAI started")
+
+-- Start the base service (home bases, pedestals, income)
+BaseService.init()
+print("[Server] BaseService started")
 
 -- Build the Dark Fantasy Kingdom environment
 KingdomBuilder.build(Remotes)

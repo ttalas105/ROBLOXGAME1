@@ -541,6 +541,44 @@ Config.ShopPositions = {
 
 Config.ShopSquareSize = Vector3.new(10, 6, 10)
 
+-- ========== HOME BASE SYSTEM ==========
+
+-- Number of base plots available
+Config.TotalBasePlots = 7
+
+-- Pedestals per base (how many weapons can be displayed)
+Config.PedestalsPerBase = 6
+
+-- Income (Keys per second) per rarity when weapon is displayed on base
+Config.BaseIncomePerRarity = {
+	Common = 1,
+	Uncommon = 3,
+	Rare = 10,
+	Epic = 50,
+	Legendary = 200,
+	Mythic = 500,
+	Exotic = 1500,
+	Divine = 5000,
+}
+
+-- How often income accumulates (seconds)
+Config.BaseIncomeInterval = 1
+
+-- Base plot size (bigger)
+Config.BasePlotSize = Vector3.new(70, 1, 50)
+
+-- Pedestal size (bigger)
+Config.PedestalSize = Vector3.new(5, 5, 5)
+
+-- Walkway to bases starts at this position (relative to hub center)
+Config.BasesWalkwayStart = Vector3.new(0, 0, 50)
+
+-- Direction bases are laid out (along Z axis, positive direction)
+Config.BasesDirection = Vector3.new(0, 0, 1)
+
+-- Spacing between base plots (more spread out)
+Config.BasePlotSpacing = 80
+
 -- Helper: Get weapon damage (default 1 if not specified)
 function Config.getWeaponDamage(weaponId: string): number
 	local weapon = Config.Weapons[weaponId]

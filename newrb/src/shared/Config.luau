@@ -37,6 +37,49 @@ export type UpgradeDef = {
 
 local Config = {}
 
+-- Per-weapon grip offsets for positioning in player's hand
+-- position = {x, y, z}, rotation = {rx, ry, rz} in degrees
+Config.WeaponGrips = {
+	-- Weapons currently in WeaponModels folder
+	wooden_sword = {
+		position = {0, 0, -2},
+		rotation = {0, 90, 0},
+		scale = 5,
+	},
+	iron_club = {
+		position = {0.2, 0, -3.3},
+		rotation = {-12, 90, 0},
+		scale = 5,
+	},
+	steel_axe = {
+		position = {0, 0, -2},
+		rotation = {0, 90, 0},
+		scale = 5,
+	},
+	wood_scythe = {
+		position = {0, 0, -2},
+		rotation = {0, 90, 0},
+		scale = 5,
+	},
+	anris_blade_of_ascension = {
+		position = {0, 0, -2},
+		rotation = {0, 90, 0},
+		scale = 5,
+	},
+	arbels_astral_singularity = {
+		position = {0, 0, -2},
+		rotation = {0, 90, 0},
+		scale = 5,
+	},
+}
+
+-- Default grip for weapons without custom config
+Config.DefaultGrip = {
+	position = {0, 0, -2},
+	rotation = {0, 90, 0},
+	scale = 5,
+}
+
 -- Rarity display order and colors (for UI)
 Config.Rarities = {
 	Common = { order = 1, color = Color3.fromRGB(176, 176, 176) },

@@ -44,7 +44,7 @@ local function cloneWeaponModel(weaponId: string): Model?
 end
 
 -- Attach weapon model to character's right hand
-local function attachWeaponToCharacter(player: Player, weaponModel: Model)
+local function attachWeaponToCharacter(player: Player, weaponModel: Model, weaponId: string)
 	local character = player.Character
 	if not character then return end
 	
@@ -54,28 +54,43 @@ local function attachWeaponToCharacter(player: Player, weaponModel: Model)
 		return
 	end
 	
-	-- Set weapon's primary part and position
-	local handle = weaponModel:FindFirstChild("Handle", true) or weaponModel.PrimaryPart
-	if not handle then
-		-- Use first BasePart as handle
-		for _, part in weaponModel:GetDescendants() do
-			if part:IsA("BasePart") then
-				handle = part
-				break
+	-- Look for a "Grip" part first (user places this exactly where hand should hold)
+	-- Then try "Handle", then PrimaryPart, then first BasePart
+	local grip = weaponModel:FindFirstChild("Grip", true)
+	local hasCustomGrip = (grip ~= nil)
+	
+	if not grip then
+		grip = weaponModel:FindFirstChild("Handle", true)
+		hasCustomGrip = (grip ~= nil)
+	end
+	
+	if not grip then
+		grip = weaponModel.PrimaryPart
+		if not grip then
+			for _, part in weaponModel:GetDescendants() do
+				if part:IsA("BasePart") then
+					grip = part
+					break
+				end
 			end
 		end
 	end
 	
-	if not handle then
-		warn("[WeaponService] No handle found in weapon model")
+	if not grip then
+		warn("[WeaponService] No grip/handle found in weapon model")
 		return
 	end
 	
-	-- Scale up the weapon (5x bigger - adjust as needed)
-	local WEAPON_SCALE = 5
+	-- Get per-weapon grip config from Config, or use default
+	local gripConfig = Config.WeaponGrips[weaponId] or Config.DefaultGrip
+	local pos = gripConfig.position
+	local rot = gripConfig.rotation
+	local scale = gripConfig.scale or 5
+	
+	-- Scale up the weapon
 	for _, part in weaponModel:GetDescendants() do
 		if part:IsA("BasePart") then
-			part.Size = part.Size * WEAPON_SCALE
+			part.Size = part.Size * scale
 		end
 	end
 	
@@ -83,13 +98,20 @@ local function attachWeaponToCharacter(player: Player, weaponModel: Model)
 	weaponModel.Parent = character
 	weaponModel.Name = "EquippedWeapon"
 	
-	-- Create weld - sword pointing up/forward from hand
+	-- Create weld
 	local weld = Instance.new("Weld")
 	weld.Part0 = rightHand
-	weld.Part1 = handle
-	-- Position: hilt at hand level, rotated 180
-	weld.C0 = CFrame.new(0, 1, -1.7) * CFrame.Angles(math.rad(-12), math.rad(270), math.rad(0))
-	weld.Parent = handle
+	weld.Part1 = grip
+	
+	if hasCustomGrip then
+		-- Custom Grip/Handle part in model: position directly in hand
+		weld.C0 = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(0), math.rad(0), math.rad(0))
+	else
+		-- Use per-weapon grip config
+		weld.C0 = CFrame.new(pos[1], pos[2], pos[3]) * CFrame.Angles(math.rad(rot[1]), math.rad(rot[2]), math.rad(rot[3]))
+	end
+	
+	weld.Parent = grip
 	
 	-- Make all parts non-collidable
 	for _, part in weaponModel:GetDescendants() do
@@ -132,7 +154,7 @@ function WeaponService.equipWeapon(player: Player, weaponUid: string): boolean
 	-- Clone and attach weapon model
 	local weaponModel = cloneWeaponModel(weaponInstance.weaponId)
 	if weaponModel then
-		attachWeaponToCharacter(player, weaponModel)
+		attachWeaponToCharacter(player, weaponModel, weaponInstance.weaponId)
 	end
 	
 	-- Track equipped weapon
@@ -270,7 +292,7 @@ function WeaponService.init()
 				-- Re-attach weapon model
 				local weaponModel = cloneWeaponModel(equipped.weaponId)
 				if weaponModel then
-					attachWeaponToCharacter(player, weaponModel)
+					attachWeaponToCharacter(player, weaponModel, equipped.weaponId)
 					equipped.model = weaponModel
 				end
 			end
@@ -285,7 +307,7 @@ function WeaponService.init()
 			if equipped then
 				local weaponModel = cloneWeaponModel(equipped.weaponId)
 				if weaponModel then
-					attachWeaponToCharacter(player, weaponModel)
+					attachWeaponToCharacter(player, weaponModel, equipped.weaponId)
 					equipped.model = weaponModel
 				end
 			end

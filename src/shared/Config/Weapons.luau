@@ -9,7 +9,7 @@ return {
 	{ id = "w_wood_scythe", name = "Wood Scythe", rarity = "Common", sellPrice = 6, oddsDenominator = 4 },
 	{ id = "w_wooden_bow", name = "Wooden Bow", rarity = "Common", sellPrice = 5, oddsDenominator = 5 },
 	{ id = "w_rusty_spear", name = "Rusty Spear", rarity = "Common", sellPrice = 5, oddsDenominator = 6 },
-	{ id = "w_training_axe", name = "Training Axe", rarity = "Common", sellPrice = 7, oddsDenominator = 7 },
+	{ id = "w_steel_axe", name = "Steel Axe", rarity = "Common", sellPrice = 7, oddsDenominator = 7 },
 	{ id = "w_broken_mace", name = "Broken Mace", rarity = "Common", sellPrice = 4, oddsDenominator = 8 },
 	{ id = "w_slingshot", name = "Slingshot", rarity = "Common", sellPrice = 3, oddsDenominator = 9 },
 	{ id = "w_iron_club", name = "Iron Club", rarity = "Common", sellPrice = 9, oddsDenominator = 10 },

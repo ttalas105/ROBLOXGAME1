@@ -9,7 +9,7 @@ return {
 		keyCost = 10,
 		weaponPool = {
 			"w_iron_daggers", "w_metal_sword", "w_wood_scythe", "w_wooden_bow", "w_rusty_spear",
-			"w_training_axe", "w_broken_mace", "w_slingshot", "w_iron_club", "w_short_sword",
+			"w_steel_axe", "w_broken_mace", "w_slingshot", "w_iron_club", "w_short_sword",
 			"w_pistol_chainsaw_sword", "w_spikey_scythe", "w_crossbow", "w_warhammer", "w_dual_steel_daggers",
 			"w_flame_baton", "w_heavy_cleaver", "w_shock_rod", "w_bone_crusher",
 			"w_blazefang_sword", "w_stormcaller_spear", "w_blood_moon_scythe",

@@ -67,7 +67,7 @@ Config.Weapons = {
 	wood_scythe = { id = "wood_scythe", name = "Wood Scythe", rarity = "Common", odds = 2, damage = 3 },
 	wooden_bow = { id = "wooden_bow", name = "Wooden Bow", rarity = "Common", odds = 2, damage = 2 },
 	rusty_spear = { id = "rusty_spear", name = "Rusty Spear", rarity = "Common", odds = 2, damage = 3 },
-	training_axe = { id = "training_axe", name = "Training Axe", rarity = "Common", odds = 2, damage = 4 },
+	steel_axe = { id = "steel_axe", name = "Steel Axe", rarity = "Common", odds = 2, damage = 4 },
 	broken_mace = { id = "broken_mace", name = "Broken Mace", rarity = "Common", odds = 2, damage = 3 },
 	slingshot = { id = "slingshot", name = "Slingshot", rarity = "Common", odds = 2, damage = 1 },
 	iron_club = { id = "iron_club", name = "Iron Club", rarity = "Common", odds = 2, damage = 4 },
@@ -150,7 +150,7 @@ Config.Crates = {
 		weaponPool = {
 			-- Common
 			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
-			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			"steel_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
 			-- Epic
 			"blazefang_sword", "stormcaller_spear", "gravewarden_axe", "frostbound_bow", "blood_moon_scythe",
 			"arcane_warhammer", "shadowstep_daggers", "venom_lash_whip", "runic_crossbow", "inferno_flail",
@@ -181,7 +181,7 @@ Config.Crates = {
 		weaponPool = {
 			-- Common
 			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
-			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			"steel_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
 			-- Rare
 			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
 			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
@@ -215,7 +215,7 @@ Config.Crates = {
 		weaponPool = {
 			-- Common
 			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
-			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			"steel_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
 			-- Rare
 			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
 			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
@@ -242,7 +242,7 @@ Config.Crates = {
 		weaponPool = {
 			-- Common
 			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
-			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			"steel_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
 			-- Rare
 			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
 			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
@@ -276,7 +276,7 @@ Config.Crates = {
 		weaponPool = {
 			-- Common
 			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
-			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			"steel_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
 			-- Rare
 			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
 			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
@@ -310,7 +310,7 @@ Config.Crates = {
 		weaponPool = {
 			-- Common
 			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
-			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			"steel_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
 			-- Rare
 			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
 			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
@@ -337,7 +337,7 @@ Config.Crates = {
 		weaponPool = {
 			-- Common
 			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
-			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			"steel_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
 			-- Rare
 			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
 			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
@@ -371,7 +371,7 @@ Config.Crates = {
 		weaponPool = {
 			-- Common
 			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
-			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			"steel_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
 			-- Rare
 			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
 			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",
@@ -405,7 +405,7 @@ Config.Crates = {
 		weaponPool = {
 			-- Common
 			"iron_daggers", "metal_sword", "wood_scythe", "wooden_bow", "rusty_spear",
-			"training_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
+			"steel_axe", "broken_mace", "slingshot", "iron_club", "short_sword",
 			-- Rare
 			"pistol", "chainsaw_sword", "spikey_scythe", "crossbow", "war_hammer",
 			"dual_steel_daggers", "flame_baton", "heavy_cleaver", "shock_rod", "bone_crusher",

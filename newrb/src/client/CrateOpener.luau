@@ -14,6 +14,11 @@ local COLORS = UIHelper.colors()
 
 local CrateOpener = {}
 
+-- Get weapon models folder from ReplicatedStorage
+local function getWeaponModelsFolder(): Folder?
+	return ReplicatedStorage:FindFirstChild("WeaponModels")
+end
+
 -- UI Elements
 local screenGui: ScreenGui?
 local spinOverlay: Frame?
@@ -188,16 +193,51 @@ local function createSpinCard(weaponId: string, index: number): Frame
 	topBarFix.ZIndex = baseZIndex + 1
 	topBarFix.Parent = topBar
 	
-	-- Weapon icon
-	local icon = Instance.new("TextLabel")
-	icon.Size = UDim2.new(1, 0, 0, 50)
-	icon.Position = UDim2.new(0, 0, 0, 15)
-	icon.BackgroundTransparency = 1
-	icon.Text = "⚔️"
-	icon.TextSize = 32
-	icon.TextColor3 = rarityColor
-	icon.ZIndex = baseZIndex + 1
-	icon.Parent = card
+	-- Weapon icon holder
+	local iconHolder = Instance.new("Frame")
+	iconHolder.Name = "IconHolder"
+	iconHolder.Size = UDim2.new(1, -10, 0, 50)
+	iconHolder.Position = UDim2.new(0, 5, 0, 12)
+	iconHolder.BackgroundTransparency = 1
+	iconHolder.ZIndex = baseZIndex + 1
+	iconHolder.Parent = card
+	
+	-- Try to create viewport with weapon model
+	local folder = getWeaponModelsFolder()
+	local hasModel = folder and folder:FindFirstChild(weaponId)
+	
+	if hasModel then
+		local viewport = Instance.new("ViewportFrame")
+		viewport.Name = "WeaponViewport"
+		viewport.Size = UDim2.new(1, 0, 1, 0)
+		viewport.BackgroundTransparency = 1
+		viewport.ZIndex = baseZIndex + 1
+		viewport.Parent = iconHolder
+		
+		local camera = Instance.new("Camera")
+		camera.CameraType = Enum.CameraType.Scriptable
+		camera.Parent = viewport
+		viewport.CurrentCamera = camera
+		
+		local model = hasModel:Clone()
+		model.Parent = viewport
+		
+		-- Get model bounds for camera positioning (closer = bigger)
+		local cf, size = model:GetBoundingBox()
+		local maxSize = math.max(size.X, size.Y, size.Z)
+		local cameraDistance = maxSize * 0.9
+		camera.CFrame = CFrame.new(cf.Position + Vector3.new(cameraDistance * 0.7, cameraDistance * 0.3, cameraDistance * 0.7), cf.Position)
+	else
+		-- Fallback icon
+		local icon = Instance.new("TextLabel")
+		icon.Size = UDim2.new(1, 0, 1, 0)
+		icon.BackgroundTransparency = 1
+		icon.Text = "⚔️"
+		icon.TextSize = 32
+		icon.TextColor3 = rarityColor
+		icon.ZIndex = baseZIndex + 1
+		icon.Parent = iconHolder
+	end
 	
 	-- Weapon name
 	local name = Instance.new("TextLabel")
@@ -434,14 +474,60 @@ local function showResult(weaponId: string, odds: number, revealedUid: string?)
 	end
 	
 	if weaponIcon then
-		weaponIcon.Text = "⚔️"
-		weaponIcon.TextColor3 = rarityColor
-		weaponIcon.TextTransparency = 1
-		task.delay(0.25, function()
-			TweenService:Create(weaponIcon, TweenInfo.new(0.3, Enum.EasingStyle.Elastic), {
-				TextTransparency = 0
-			}):Play()
-		end)
+		-- Clear any existing viewport
+		local existingViewport = weaponIcon.Parent and weaponIcon.Parent:FindFirstChild("ResultWeaponViewport")
+		if existingViewport then existingViewport:Destroy() end
+		
+		-- Try to create viewport with weapon model
+		local folder = getWeaponModelsFolder()
+		local hasModel = folder and folder:FindFirstChild(weaponId)
+		
+		if hasModel and resultCard then
+			-- Hide text icon
+			weaponIcon.Text = ""
+			
+			-- Create viewport for result
+			local viewport = Instance.new("ViewportFrame")
+			viewport.Name = "ResultWeaponViewport"
+			viewport.Size = UDim2.new(0, 120, 0, 100)
+			viewport.Position = UDim2.new(0.5, 0, 0, 15)
+			viewport.AnchorPoint = Vector2.new(0.5, 0)
+			viewport.BackgroundTransparency = 1
+			viewport.ZIndex = 103
+			viewport.Parent = resultCard
+			
+			local camera = Instance.new("Camera")
+			camera.CameraType = Enum.CameraType.Scriptable
+			camera.Parent = viewport
+			viewport.CurrentCamera = camera
+			
+			local model = hasModel:Clone()
+			model.Parent = viewport
+			
+			-- Get model bounds for camera positioning (closer = bigger)
+			local cf, size = model:GetBoundingBox()
+			local maxSize = math.max(size.X, size.Y, size.Z)
+			local cameraDistance = maxSize * 1.0
+			camera.CFrame = CFrame.new(cf.Position + Vector3.new(cameraDistance * 0.7, cameraDistance * 0.3, cameraDistance * 0.7), cf.Position)
+			
+			-- Animate viewport in
+			viewport.Size = UDim2.new(0, 20, 0, 20)
+			task.delay(0.25, function()
+				TweenService:Create(viewport, TweenInfo.new(0.3, Enum.EasingStyle.Elastic), {
+					Size = UDim2.new(0, 120, 0, 100)
+				}):Play()
+			end)
+		else
+			-- Fallback to emoji
+			weaponIcon.Text = "⚔️"
+			weaponIcon.TextColor3 = rarityColor
+			weaponIcon.TextTransparency = 1
+			task.delay(0.25, function()
+				TweenService:Create(weaponIcon, TweenInfo.new(0.3, Enum.EasingStyle.Elastic), {
+					TextTransparency = 0
+				}):Play()
+			end)
+		end
 	end
 	
 	if weaponName then
@@ -519,6 +605,10 @@ local function hideResult()
 	end
 	
 	if resultCard then
+		-- Clean up result viewport
+		local resultViewport = resultCard:FindFirstChild("ResultWeaponViewport")
+		if resultViewport then resultViewport:Destroy() end
+		
 		TweenService:Create(resultCard, TweenInfo.new(0.15), {
 			Size = UDim2.new(0, 50, 0, 50),
 			BackgroundTransparency = 1

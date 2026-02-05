@@ -9,27 +9,74 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local UIHelper = require(script.Parent.UIHelper)
 
+local ShopRemotes = require(script.Parent.ShopRemotes)
+
 local InventoryWindow = {}
 
 local screenGui: ScreenGui?
 local windowFrame: Frame?
 local weaponsContainer: Frame?
 local currentState: any = nil
+local equippedWeaponUid: string? = nil -- Track currently equipped weapon
 local COLORS = UIHelper.colors()
 
 -- Weapon slot size
 local SLOT_SIZE = 80
-local SLOTS_PER_ROW = 5
-local MAX_SLOTS = 10
+local SLOTS_PER_ROW = 8
+local MAX_SLOTS = 64 -- DEBUG: Increased for testing all weapons
+
+-- Get weapon models folder from ReplicatedStorage
+local function getWeaponModelsFolder(): Folder?
+	return ReplicatedStorage:FindFirstChild("WeaponModels")
+end
+
+-- Create a ViewportFrame with the weapon model
+local function createWeaponViewport(parent: Frame, weaponId: string): ViewportFrame
+	local viewport = Instance.new("ViewportFrame")
+	viewport.Name = "WeaponViewport"
+	viewport.Size = UDim2.new(1, -10, 1, -30)
+	viewport.Position = UDim2.new(0, 5, 0, 5)
+	viewport.BackgroundTransparency = 1
+	viewport.Parent = parent
+	
+	-- Add camera
+	local camera = Instance.new("Camera")
+	camera.CameraType = Enum.CameraType.Scriptable
+	camera.Parent = viewport
+	viewport.CurrentCamera = camera
+	
+	-- Clone weapon model
+	local folder = getWeaponModelsFolder()
+	if folder then
+		local template = folder:FindFirstChild(weaponId)
+		if template then
+			local model = template:Clone()
+			model.Parent = viewport
+			
+			-- Get model bounds for camera positioning
+			local cf, size = model:GetBoundingBox()
+			local maxSize = math.max(size.X, size.Y, size.Z)
+			
+			-- Position camera to frame the weapon nicely
+			local cameraDistance = maxSize * 1.8
+			camera.CFrame = CFrame.new(cf.Position + Vector3.new(cameraDistance * 0.7, cameraDistance * 0.3, cameraDistance * 0.7), cf.Position)
+		end
+	end
+	
+	return viewport
+end
 
 -- Create a weapon slot
 local function createWeaponSlot(index: number, parent: Frame): Frame
-	local slot = Instance.new("Frame")
+	-- Use TextButton for clickability
+	local slot = Instance.new("TextButton")
 	slot.Name = "WeaponSlot_" .. index
 	slot.Size = UDim2.new(0, SLOT_SIZE, 0, SLOT_SIZE)
 	slot.BackgroundColor3 = COLORS.bgDark
 	slot.BackgroundTransparency = 0.3
 	slot.BorderSizePixel = 0
+	slot.Text = ""
+	slot.AutoButtonColor = false
 	slot.Parent = parent
 	
 	local corner = Instance.new("UICorner")
@@ -42,17 +89,58 @@ local function createWeaponSlot(index: number, parent: Frame): Frame
 	stroke.Transparency = 0.5
 	stroke.Parent = slot
 	
-	-- Weapon icon
+	-- Equipped indicator (green glow)
+	local equippedIndicator = Instance.new("Frame")
+	equippedIndicator.Name = "EquippedIndicator"
+	equippedIndicator.Size = UDim2.new(1, 6, 1, 6)
+	equippedIndicator.Position = UDim2.new(0, -3, 0, -3)
+	equippedIndicator.BackgroundColor3 = Color3.fromRGB(50, 255, 50)
+	equippedIndicator.BackgroundTransparency = 1 -- Hidden by default
+	equippedIndicator.BorderSizePixel = 0
+	equippedIndicator.ZIndex = 0
+	equippedIndicator.Parent = slot
+	
+	local indicatorCorner = Instance.new("UICorner")
+	indicatorCorner.CornerRadius = UDim.new(0, 10)
+	indicatorCorner.Parent = equippedIndicator
+	
+	-- Equipped badge
+	local equippedBadge = Instance.new("TextLabel")
+	equippedBadge.Name = "EquippedBadge"
+	equippedBadge.Size = UDim2.new(0, 20, 0, 20)
+	equippedBadge.Position = UDim2.new(1, -18, 0, -2)
+	equippedBadge.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+	equippedBadge.BackgroundTransparency = 1 -- Hidden by default
+	equippedBadge.TextTransparency = 1 -- Hidden by default
+	equippedBadge.Text = "✓"
+	equippedBadge.TextColor3 = Color3.new(1, 1, 1)
+	equippedBadge.TextSize = 14
+	equippedBadge.Font = Enum.Font.GothamBold
+	equippedBadge.ZIndex = 10
+	equippedBadge.Parent = slot
+	
+	local badgeCorner = Instance.new("UICorner")
+	badgeCorner.CornerRadius = UDim.new(1, 0)
+	badgeCorner.Parent = equippedBadge
+	
+	-- Weapon viewport (will be populated when weapon is set)
+	local viewportHolder = Instance.new("Frame")
+	viewportHolder.Name = "ViewportHolder"
+	viewportHolder.Size = UDim2.new(1, -10, 1, -30)
+	viewportHolder.Position = UDim2.new(0, 5, 0, 5)
+	viewportHolder.BackgroundTransparency = 1
+	viewportHolder.Parent = slot
+	
+	-- Fallback icon (shown if no model)
 	local icon = Instance.new("TextLabel")
 	icon.Name = "Icon"
-	icon.Size = UDim2.new(1, -10, 1, -30)
-	icon.Position = UDim2.new(0, 5, 0, 5)
+	icon.Size = UDim2.new(1, 0, 1, 0)
 	icon.BackgroundTransparency = 1
 	icon.Text = "⚔️"
 	icon.TextSize = 40
 	icon.Font = Enum.Font.GothamBold
 	icon.TextColor3 = Color3.new(1, 1, 1)
-	icon.Parent = slot
+	icon.Parent = viewportHolder
 	
 	-- Weapon name
 	local nameLabel = Instance.new("TextLabel")
@@ -84,6 +172,36 @@ local function createWeaponSlot(index: number, parent: Frame): Frame
 	slot:SetAttribute("WeaponId", "")
 	slot:SetAttribute("WeaponUid", "")
 	
+	-- Click to equip
+	slot.MouseButton1Click:Connect(function()
+		local weaponUid = slot:GetAttribute("WeaponUid")
+		if weaponUid and weaponUid ~= "" then
+			-- Toggle equip/unequip
+			if equippedWeaponUid == weaponUid then
+				-- Unequip
+				ShopRemotes.unequipWeapon():FireServer()
+			else
+				-- Equip
+				ShopRemotes.equipWeapon():FireServer(weaponUid)
+			end
+		end
+	end)
+	
+	-- Hover effect
+	slot.MouseEnter:Connect(function()
+		if slot:GetAttribute("WeaponUid") ~= "" then
+			TweenService:Create(slot, TweenInfo.new(0.1), {
+				BackgroundTransparency = 0.1
+			}):Play()
+		end
+	end)
+	
+	slot.MouseLeave:Connect(function()
+		TweenService:Create(slot, TweenInfo.new(0.1), {
+			BackgroundTransparency = 0.3
+		}):Play()
+	end)
+	
 	return slot
 end
 
@@ -92,18 +210,33 @@ local function clearSlot(slot: Frame)
 	slot:SetAttribute("WeaponId", "")
 	slot:SetAttribute("WeaponUid", "")
 	
-	local icon = slot:FindFirstChild("Icon") :: TextLabel?
+	local viewportHolder = slot:FindFirstChild("ViewportHolder") :: Frame?
 	local nameLabel = slot:FindFirstChild("Name") :: TextLabel?
 	local stripe = slot:FindFirstChild("RarityStripe") :: Frame?
 	local stroke = slot:FindFirstChildOfClass("UIStroke")
+	local equippedIndicator = slot:FindFirstChild("EquippedIndicator") :: Frame?
+	local equippedBadge = slot:FindFirstChild("EquippedBadge") :: TextLabel?
 	
-	if icon then
-		icon.Text = ""
-		icon.TextColor3 = Color3.new(1, 1, 1)
+	if viewportHolder then
+		-- Remove any existing viewport
+		local existingViewport = viewportHolder:FindFirstChild("WeaponViewport")
+		if existingViewport then existingViewport:Destroy() end
+		
+		-- Hide fallback icon
+		local icon = viewportHolder:FindFirstChild("Icon") :: TextLabel?
+		if icon then
+			icon.Text = ""
+			icon.TextColor3 = Color3.new(1, 1, 1)
+		end
 	end
 	if nameLabel then nameLabel.Text = "" end
 	if stripe then stripe.BackgroundTransparency = 1 end
 	if stroke then stroke.Color = COLORS.border end
+	if equippedIndicator then equippedIndicator.BackgroundTransparency = 1 end
+	if equippedBadge then 
+		equippedBadge.BackgroundTransparency = 1 
+		equippedBadge.TextTransparency = 1
+	end
 end
 
 -- Fill a slot with weapon data
@@ -118,14 +251,55 @@ local function fillSlot(slot: Frame, weaponId: string, uid: string, rarity: stri
 	slot:SetAttribute("WeaponId", weaponId)
 	slot:SetAttribute("WeaponUid", uid)
 	
-	local icon = slot:FindFirstChild("Icon") :: TextLabel?
+	local viewportHolder = slot:FindFirstChild("ViewportHolder") :: Frame?
 	local nameLabel = slot:FindFirstChild("Name") :: TextLabel?
 	local stripe = slot:FindFirstChild("RarityStripe") :: Frame?
 	local stroke = slot:FindFirstChildOfClass("UIStroke")
+	local equippedIndicator = slot:FindFirstChild("EquippedIndicator") :: Frame?
+	local equippedBadge = slot:FindFirstChild("EquippedBadge") :: TextLabel?
 	
-	if icon then
-		icon.Text = "⚔️"
-		icon.TextColor3 = rarityColor
+	if viewportHolder then
+		-- Remove any existing viewport
+		local existingViewport = viewportHolder:FindFirstChild("WeaponViewport")
+		if existingViewport then existingViewport:Destroy() end
+		
+		local icon = viewportHolder:FindFirstChild("Icon") :: TextLabel?
+		
+		-- Try to create viewport with weapon model
+		local folder = getWeaponModelsFolder()
+		local hasModel = folder and folder:FindFirstChild(weaponId)
+		
+		if hasModel then
+			-- Create viewport with 3D model
+			local viewport = Instance.new("ViewportFrame")
+			viewport.Name = "WeaponViewport"
+			viewport.Size = UDim2.new(1, 0, 1, 0)
+			viewport.BackgroundTransparency = 1
+			viewport.Parent = viewportHolder
+			
+			local camera = Instance.new("Camera")
+			camera.CameraType = Enum.CameraType.Scriptable
+			camera.Parent = viewport
+			viewport.CurrentCamera = camera
+			
+			local model = hasModel:Clone()
+			model.Parent = viewport
+			
+			-- Get model bounds for camera positioning (closer = bigger)
+			local cf, size = model:GetBoundingBox()
+			local maxSize = math.max(size.X, size.Y, size.Z)
+			local cameraDistance = maxSize * 0.9
+			camera.CFrame = CFrame.new(cf.Position + Vector3.new(cameraDistance * 0.7, cameraDistance * 0.3, cameraDistance * 0.7), cf.Position)
+			
+			-- Hide fallback icon
+			if icon then icon.Text = "" end
+		else
+			-- Show fallback icon
+			if icon then
+				icon.Text = "⚔️"
+				icon.TextColor3 = rarityColor
+			end
+		end
 	end
 	
 	if nameLabel then
@@ -146,6 +320,16 @@ local function fillSlot(slot: Frame, weaponId: string, uid: string, rarity: stri
 	if stroke then
 		stroke.Color = rarityColor
 	end
+	
+	-- Show equipped indicator if this weapon is equipped
+	local isEquipped = (equippedWeaponUid == uid)
+	if equippedIndicator then
+		equippedIndicator.BackgroundTransparency = isEquipped and 0.7 or 1
+	end
+	if equippedBadge then
+		equippedBadge.BackgroundTransparency = isEquipped and 0 or 1
+		equippedBadge.TextTransparency = isEquipped and 0 or 1
+	end
 end
 
 function InventoryWindow.build(playerGui: PlayerGui)
@@ -161,8 +345,9 @@ function InventoryWindow.build(playerGui: PlayerGui)
 	screenGui.Parent = playerGui
 	
 	-- Main window frame (centered)
-	local windowWidth = (SLOT_SIZE * SLOTS_PER_ROW) + 40
-	local windowHeight = (SLOT_SIZE * 2) + 100 -- 2 rows for 10 slots
+	local numRows = math.ceil(MAX_SLOTS / SLOTS_PER_ROW)
+	local windowWidth = (SLOT_SIZE * SLOTS_PER_ROW) + 60
+	local windowHeight = math.min((SLOT_SIZE * numRows) + 100, 600) -- Cap height, will scroll
 	
 	windowFrame = Instance.new("Frame")
 	windowFrame.Name = "Window"
@@ -230,13 +415,26 @@ function InventoryWindow.build(playerGui: PlayerGui)
 		InventoryWindow.hide()
 	end)
 	
-	-- Weapons container (grid)
+	-- Scrolling frame for weapons
+	local scrollFrame = Instance.new("ScrollingFrame")
+	scrollFrame.Name = "ScrollFrame"
+	scrollFrame.Size = UDim2.new(1, -20, 1, -70)
+	scrollFrame.Position = UDim2.new(0, 10, 0, 50)
+	scrollFrame.BackgroundTransparency = 1
+	scrollFrame.BorderSizePixel = 0
+	scrollFrame.ScrollBarThickness = 8
+	scrollFrame.ScrollBarImageColor3 = COLORS.accent
+	scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0) -- Will be set by UIGridLayout
+	scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	scrollFrame.Parent = windowFrame
+	
+	-- Weapons container (grid) inside scroll frame
 	weaponsContainer = Instance.new("Frame")
 	weaponsContainer.Name = "WeaponsContainer"
-	weaponsContainer.Size = UDim2.new(1, -20, 1, -60)
-	weaponsContainer.Position = UDim2.new(0, 10, 0, 50)
+	weaponsContainer.Size = UDim2.new(1, -10, 0, 0) -- Height auto from layout
 	weaponsContainer.BackgroundTransparency = 1
-	weaponsContainer.Parent = windowFrame
+	weaponsContainer.AutomaticSize = Enum.AutomaticSize.Y
+	weaponsContainer.Parent = scrollFrame
 	
 	-- Grid layout
 	local gridLayout = Instance.new("UIGridLayout")
@@ -247,7 +445,7 @@ function InventoryWindow.build(playerGui: PlayerGui)
 	gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	gridLayout.Parent = weaponsContainer
 	
-	-- Create weapon slots (10 slots)
+	-- Create weapon slots
 	for i = 1, MAX_SLOTS do
 		local slot = createWeaponSlot(i, weaponsContainer)
 		slot.LayoutOrder = i
@@ -266,6 +464,9 @@ function InventoryWindow.build(playerGui: PlayerGui)
 	counterLabel.TextXAlignment = Enum.TextXAlignment.Center
 	counterLabel.Parent = windowFrame
 	
+	-- Connect to weapon events
+	InventoryWindow.connectEvents()
+	
 	print("[InventoryWindow] UI built")
 end
 
@@ -275,7 +476,7 @@ function InventoryWindow.refresh(state: any)
 	
 	-- Clear all slots
 	for _, slot in weaponsContainer:GetChildren() do
-		if slot:IsA("Frame") and slot.Name:match("^WeaponSlot_") then
+		if slot:IsA("TextButton") and slot.Name:match("^WeaponSlot_") then
 			clearSlot(slot)
 		end
 	end
@@ -297,7 +498,7 @@ function InventoryWindow.refresh(state: any)
 	-- Fill slots with weapons (max 10)
 	local slots = {}
 	for _, slot in weaponsContainer:GetChildren() do
-		if slot:IsA("Frame") and slot.Name:match("^WeaponSlot_") then
+		if slot:IsA("TextButton") and slot.Name:match("^WeaponSlot_") then
 			table.insert(slots, slot)
 		end
 	end
@@ -329,9 +530,13 @@ function InventoryWindow.show()
 	if screenGui then
 		screenGui.Enabled = true
 		if windowFrame then
+			local numRows = math.ceil(MAX_SLOTS / SLOTS_PER_ROW)
+			local targetWidth = (SLOT_SIZE * SLOTS_PER_ROW) + 60
+			local targetHeight = math.min((SLOT_SIZE * numRows) + 100, 600)
+			
 			windowFrame.Size = UDim2.new(0, 0, 0, 0)
 			TweenService:Create(windowFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-				Size = UDim2.new(0, (SLOT_SIZE * SLOTS_PER_ROW) + 40, 0, (SLOT_SIZE * 2) + 100)
+				Size = UDim2.new(0, targetWidth, 0, targetHeight)
 			}):Play()
 		end
 	end
@@ -351,6 +556,50 @@ end
 
 function InventoryWindow.isVisible(): boolean
 	return screenGui and screenGui.Enabled or false
+end
+
+-- Update equipped weapon state and refresh visuals
+function InventoryWindow.setEquippedWeapon(weaponUid: string?)
+	equippedWeaponUid = weaponUid
+	
+	-- Update all slot visuals
+	if weaponsContainer then
+		for _, slot in weaponsContainer:GetChildren() do
+			if slot:IsA("TextButton") and slot.Name:match("^WeaponSlot_") then
+				local uid = slot:GetAttribute("WeaponUid")
+				local isEquipped = (uid and uid ~= "" and uid == equippedWeaponUid)
+				
+				local equippedIndicator = slot:FindFirstChild("EquippedIndicator") :: Frame?
+				local equippedBadge = slot:FindFirstChild("EquippedBadge") :: TextLabel?
+				
+				if equippedIndicator then
+					TweenService:Create(equippedIndicator, TweenInfo.new(0.2), {
+						BackgroundTransparency = isEquipped and 0.7 or 1
+					}):Play()
+				end
+				if equippedBadge then
+					TweenService:Create(equippedBadge, TweenInfo.new(0.2), {
+						BackgroundTransparency = isEquipped and 0 or 1,
+						TextTransparency = isEquipped and 0 or 1
+					}):Play()
+				end
+			end
+		end
+	end
+end
+
+function InventoryWindow.getEquippedWeaponUid(): string?
+	return equippedWeaponUid
+end
+
+-- Connect to weapon equipped event
+function InventoryWindow.connectEvents()
+	ShopRemotes.weaponEquipped().OnClientEvent:Connect(function(data)
+		if data and data.success then
+			InventoryWindow.setEquippedWeapon(data.uid)
+			print("[InventoryWindow] Weapon equipped:", data.weaponId or "none")
+		end
+	end)
 end
 
 return InventoryWindow

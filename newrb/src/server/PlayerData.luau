@@ -35,15 +35,17 @@ local STARTING_WEAPON_ID = "wooden_sword"
 
 local function getOrCreate(player: Player): PlayerDataState
 	if not dataByPlayer[player] then
-		-- Create player data with starting weapon
-		local startingWeaponUid = newUid()
+		-- DEBUG: Add ALL weapons to inventory for testing
+		local allWeapons = {}
+		for weaponId, _ in Config.Weapons do
+			table.insert(allWeapons, { weaponId = weaponId, uid = newUid() })
+		end
+		
 		dataByPlayer[player] = {
 			keys = Config.StartingKeys,
 			gems = Config.StartingGems,
 			xp = Config.StartingXP,
-			weapons = {
-				{ weaponId = STARTING_WEAPON_ID, uid = startingWeaponUid }, -- Debug starter weapon
-			},
+			weapons = allWeapons, -- DEBUG: All weapons for testing
 			crates = {},
 			upgrades = {},
 			arenasCompleted = {},
